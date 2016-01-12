@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 
 import rx.Observable;
 import rx.Subscription;
@@ -62,7 +61,6 @@ public class RxRetainFragment<T> extends Fragment {
         }
     }
 
-    @Nullable
     private static <T> RxRetainFragment<T> getFragmentByTag(FragmentManager fragmentManager, String tag) {
         return (RxRetainFragment<T>) fragmentManager.findFragmentByTag(tag);
     }
@@ -116,7 +114,7 @@ public class RxRetainFragment<T> extends Fragment {
         return mCurrentSubscription;
     }
 
-    private void unsubscribeIfOption(@Nullable Subscription subscription) {
+    private void unsubscribeIfOption(Subscription subscription) {
         if (subscription != null && !subscription.isUnsubscribed()) {
             subscription.unsubscribe();
         }
