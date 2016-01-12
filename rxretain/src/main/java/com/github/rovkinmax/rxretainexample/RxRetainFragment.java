@@ -1,4 +1,4 @@
-package com.github.rovkinmax.rxretain;
+package com.github.rovkinmax.rxretainexample;
 
 import android.annotation.SuppressLint;
 import android.app.Fragment;

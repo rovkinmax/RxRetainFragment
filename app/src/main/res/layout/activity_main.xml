@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.github.rovkinmax.rxretain.MainActivity">
+    tools:context="com.github.rovkinmax.rxretainexample.MainActivity">
 
     <ProgressBar
         android:id="@+id/progress"

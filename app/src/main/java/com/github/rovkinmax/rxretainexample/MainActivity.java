@@ -1,4 +1,4 @@
-package com.github.rovkinmax.rxretain;
+package com.github.rovkinmax.rxretainexample;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;

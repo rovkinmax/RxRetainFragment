@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        applicationId "com.github.rovkinmax.rxretain"
+        applicationId "com.github.rovkinmax.rxretainexample"
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
