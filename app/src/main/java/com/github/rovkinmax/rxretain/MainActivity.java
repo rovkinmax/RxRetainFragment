@@ -3,7 +3,6 @@ package com.github.rovkinmax.rxretain;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -19,14 +18,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        final View progress = findViewById(R.id.progress);
+        startObservable(-1);
+    }
 
-        Observable<Integer> observable = initReadyToUserObservable(progress);
-        RxRetainFragment.build(getFragmentManager(), observable)
+    private void startObservable(int count) {
+        Observable<Integer> observable = initReadyToUserObservable(count);
+        RxRetainFragment.start(getFragmentManager(), observable)
                 .subscribe(new Action1<Integer>() {
                     @Override
                     public void call(Integer integer) {
-                        Log.d(TAG, "Value" + integer);
+                        Log.d(TAG, "Value" + (integer + 1));
                     }
                 }, new Action1<Throwable>() {
                     @Override
@@ -36,19 +37,38 @@ public class MainActivity extends AppCompatActivity {
                 }, new Action0() {
                     @Override
                     public void call() {
-                        progress.setVisibility(View.GONE);
                     }
                 });
     }
 
-    private Observable<Integer> initReadyToUserObservable(final View progress) {
-        return buildDelayRange(10)
+    private Observable<Integer> initReadyToUserObservable(int count) {
+        return buildDelayRange(count)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe(new Action0() {
+                .doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        restartObservable(11);
+                    }
+                });
+    }
+
+    private void restartObservable(int count) {
+        Observable<Integer> observable = initReadyToUserObservable(count);
+        RxRetainFragment.restart(getFragmentManager(), observable)
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer integer) {
+                        Log.d(TAG, "Value" + (integer + 1));
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+
+                    }
+                }, new Action0() {
                     @Override
                     public void call() {
-                        progress.setVisibility(View.VISIBLE);
                     }
                 });
     }
@@ -57,16 +77,24 @@ public class MainActivity extends AppCompatActivity {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(Subscriber<? super Integer> subscriber) {
+                if (maxRange < 0) {
+                    throw new IllegalArgumentException();
+                }
                 for (int i = 0; i < maxRange; i++) {
                     subscriber.onNext(i);
                     try {
                         Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    } catch (InterruptedException ignored) {
                     }
                 }
                 subscriber.onCompleted();
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        RxRetainFragment.stopExecution(getFragmentManager());
+        super.onBackPressed();
     }
 }
