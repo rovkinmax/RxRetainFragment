@@ -21,11 +21,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mRotateExample = RxRetainFragment.create(getFragmentManager(), initReadyToUserObservable(10), "ROTATION_PRINTER");
+        mRotateExample = RxRetainFactory.create(getFragmentManager(), initReadyToUserObservable(10), new RetainSubscriber<Integer>() {
+            @Override
+            public void onNext(Integer integer) {
+                printInt(integer);
+            }
+        }, "ROTATION_PRINTER");
     }
 
     public void simpleRun(View v) {
-        RxRetainFragment.start(getFragmentManager(), initReadyToUserObservable(10))
+        RxRetainFactory.start(getFragmentManager(), initReadyToUserObservable(10), null)
                 .subscribe(buildPrintAction());
     }
 
@@ -34,10 +39,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startTwoObservable(View v) {
-        RxRetainFragment.start(getFragmentManager(), initReadyToUserObservable(-11, -1), "NEGATIVE_PRINTER")
+        RxRetainFactory.start(getFragmentManager(), initReadyToUserObservable(-11, -1), null, "NEGATIVE_PRINTER")
                 .subscribe(buildPrintAction());
 
-        RxRetainFragment.start(getFragmentManager(), initReadyToUserObservable(0, 10), "POSITIVE_PRINTER")
+        RxRetainFactory.start(getFragmentManager(), initReadyToUserObservable(0, 10), null, "POSITIVE_PRINTER")
                 .subscribe(buildPrintAction());
     }
 
@@ -51,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                         restartObservable(11, tag);
                     }
                 });
-        RxRetainFragment.start(getFragmentManager(), observable, tag)
+        RxRetainFactory.start(getFragmentManager(), observable, null, tag)
                 .subscribe(buildPrintAction(), new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
@@ -66,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void restartObservable(int count, String tag) {
         Observable<Integer> observable = initReadyToUserObservable(count);
-        RxRetainFragment.restart(getFragmentManager(), observable, tag)
+        RxRetainFactory.restart(getFragmentManager(), observable, null, tag)
                 .subscribe(buildPrintAction(), new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
@@ -80,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void rotateExample(View view) {
-        mRotateExample.subscribe(buildPrintAction());
+        mRotateExample.start();
     }
 
     private Observable<Integer> initReadyToUserObservable(int count) {
@@ -98,9 +103,13 @@ public class MainActivity extends AppCompatActivity {
         return new Action1<Integer>() {
             @Override
             public void call(Integer integer) {
-                Log.d(TAG, "Value" + (integer + 1));
+                printInt(integer);
             }
         };
+    }
+
+    private void printInt(Integer integer) {
+        Log.d(TAG, "Value" + (integer + 1));
     }
 
     private Observable<Integer> buildDelayRange(final int min, final int max) {
