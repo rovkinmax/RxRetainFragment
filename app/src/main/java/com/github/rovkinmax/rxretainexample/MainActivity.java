@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        RxRetainFragment.stopExecution(getFragmentManager());
+        //RxRetainFragment.stopExecution(getFragmentManager());
         super.onBackPressed();
     }
 }

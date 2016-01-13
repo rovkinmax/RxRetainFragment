@@ -5,6 +5,8 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 
+import java.lang.ref.WeakReference;
+
 import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action0;
@@ -18,8 +20,8 @@ public class RxRetainFragment<T> extends Fragment {
     private static final String DEFAULT_TAG = "RX_RETAIN_FRAGMENT_INSTANCE";
 
     private ReplaySubject<T> mReplaySubject;
-    private Subscription mCurrentSubscription;
-    private Subscription mReplaySubscription;
+    private WeakReference<Subscription> mCurrentSubscription;
+    private WeakReference<Subscription> mReplaySubscription;
     private RxLifecycleCallback<T> mRxLifecycleCallback = new RxLifecycleCallback<>(this);
 
     public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable) {
@@ -74,9 +76,11 @@ public class RxRetainFragment<T> extends Fragment {
     }
 
     private void initEmitting(Observable<T> observable) {
-        unsubscribeIfOption(mReplaySubscription);
+        if (mReplaySubscription != null) {
+            unsubscribeIfOption(mReplaySubscription.get());
+        }
         mReplaySubject = ReplaySubject.create();
-        mReplaySubscription = observable.subscribe(mReplaySubject);
+        mReplaySubscription = new WeakReference<>(observable.subscribe(mReplaySubject));
     }
 
     @Override
@@ -97,21 +101,27 @@ public class RxRetainFragment<T> extends Fragment {
     }
 
     void unsubscribeCurrentIfOption() {
-        unsubscribeIfOption(mCurrentSubscription);
+        if (mCurrentSubscription != null) {
+            unsubscribeIfOption(mCurrentSubscription.get());
+            mCurrentSubscription.clear();
+        }
     }
 
     private void cancelExecution() {
-        unsubscribeIfOption(mReplaySubscription);
+        if (mReplaySubscription != null) {
+            unsubscribeIfOption(mReplaySubscription.get());
+            mReplaySubscription.clear();
+        }
     }
 
     public Subscription subscribe(Action1<T> nextAction) {
-        mCurrentSubscription = mReplaySubject.subscribe(nextAction);
-        return mCurrentSubscription;
+        mCurrentSubscription = new WeakReference<>(mReplaySubject.subscribe(nextAction));
+        return mCurrentSubscription.get();
     }
 
     public final Subscription subscribe(final Action1<? super T> onNext, final Action1<Throwable> onError, final Action0 onComplete) {
-        mCurrentSubscription = mReplaySubject.subscribe(onNext, onError, onComplete);
-        return mCurrentSubscription;
+        mCurrentSubscription = new WeakReference<>(mReplaySubject.subscribe(onNext, onError, onComplete));
+        return mCurrentSubscription.get();
     }
 
     private void unsubscribeIfOption(Subscription subscription) {
