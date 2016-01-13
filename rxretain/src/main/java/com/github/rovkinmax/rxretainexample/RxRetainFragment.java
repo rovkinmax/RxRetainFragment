@@ -8,6 +8,7 @@ import android.os.Bundle;
 import java.lang.ref.WeakReference;
 
 import rx.Observable;
+import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action0;
 import rx.functions.Action1;
@@ -20,9 +21,23 @@ public class RxRetainFragment<T> extends Fragment {
     private static final String DEFAULT_TAG = "RX_RETAIN_FRAGMENT_INSTANCE";
 
     private ReplaySubject<T> mReplaySubject;
+    private WeakReference<Observable<T>> mObservable;
     private WeakReference<Subscription> mCurrentSubscription;
     private WeakReference<Subscription> mReplaySubscription;
     private RxLifecycleCallback<T> mRxLifecycleCallback = new RxLifecycleCallback<>(this);
+
+    public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable) {
+        return create(fragmentManager, observable, DEFAULT_TAG);
+    }
+
+    public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable, String tag) {
+        RxRetainFragment<T> fragment = getFragmentByTag(fragmentManager, tag);
+        if (fragment == null) {
+            fragment = new RxRetainFragment<>(observable);
+            fragmentManager.beginTransaction().add(fragment, tag).commit();
+        }
+        return fragment;
+    }
 
     public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable) {
         return start(fragmentManager, observable, DEFAULT_TAG);
@@ -33,6 +48,7 @@ public class RxRetainFragment<T> extends Fragment {
         if (fragment == null) {
             fragment = new RxRetainFragment<>(observable);
             fragmentManager.beginTransaction().add(fragment, tag).commit();
+            fragment.initEmittingAndStart();
         }
         return fragment;
     }
@@ -46,9 +62,12 @@ public class RxRetainFragment<T> extends Fragment {
         if (fragment == null) {
             fragment = new RxRetainFragment<>(observable);
             fragmentManager.beginTransaction().add(fragment, tag).commit();
+
         } else {
-            fragment.initEmitting(observable);
+            fragment.clearCurrentObservableIfOption();
+            fragment.setCurrentObservable(observable);
         }
+        fragment.initEmittingAndStart();
         return fragment;
     }
 
@@ -72,15 +91,19 @@ public class RxRetainFragment<T> extends Fragment {
 
     @SuppressLint("ValidFragment")
     private RxRetainFragment(Observable<T> observable) {
-        initEmitting(observable);
+        setCurrentObservable(observable);
     }
 
-    private void initEmitting(Observable<T> observable) {
-        if (mReplaySubscription != null) {
-            unsubscribeIfOption(mReplaySubscription.get());
+
+    private void setCurrentObservable(Observable<T> observable) {
+        mObservable = new WeakReference<>(observable);
+    }
+
+    private void clearCurrentObservableIfOption() {
+        if (mObservable != null) {
+            mObservable.clear();
+            mObservable = null;
         }
-        mReplaySubject = ReplaySubject.create();
-        mReplaySubscription = new WeakReference<>(observable.subscribe(mReplaySubject));
     }
 
     @Override
@@ -115,13 +138,48 @@ public class RxRetainFragment<T> extends Fragment {
     }
 
     public Subscription subscribe(Action1<T> nextAction) {
-        mCurrentSubscription = new WeakReference<>(mReplaySubject.subscribe(nextAction));
+        if (mReplaySubject == null) {
+            initEmittingAndStart();
+        }
+        return setCurrentSubscription(mReplaySubject.subscribe(nextAction));
+    }
+
+    public Subscription subscribe(final Action1<? super T> onNext, final Action1<Throwable> onError, final Action0 onComplete) {
+        if (mReplaySubject == null) {
+            initEmittingAndStart();
+        }
+        return setCurrentSubscription(mReplaySubject.subscribe(onNext, onError, onComplete));
+    }
+
+    public final Subscription subscribe(Subscriber<? super T> subscriber) {
+        if (mReplaySubject == null) {
+            initEmittingAndStart();
+        }
+        return setCurrentSubscription(mReplaySubject.subscribe(subscriber));
+    }
+
+    private Subscription setCurrentSubscription(Subscription subscription) {
+        if (mReplaySubject == null) {
+            initEmittingAndStart();
+        }
+        mCurrentSubscription = new WeakReference<>(subscription);
         return mCurrentSubscription.get();
     }
 
-    public final Subscription subscribe(final Action1<? super T> onNext, final Action1<Throwable> onError, final Action0 onComplete) {
-        mCurrentSubscription = new WeakReference<>(mReplaySubject.subscribe(onNext, onError, onComplete));
-        return mCurrentSubscription.get();
+    private void initEmittingAndStart() {
+        if (mReplaySubscription != null) {
+            unsubscribeIfOption(mReplaySubscription.get());
+        }
+        if (mObservable != null && mObservable.get() != null) {
+            startEmitting(mObservable.get());
+        } else {
+            throw new RuntimeException("Can't run. First you must create RxRetainFragment with not null observer");
+        }
+    }
+
+    private void startEmitting(Observable<T> observable) {
+        mReplaySubject = ReplaySubject.create();
+        mReplaySubscription = new WeakReference<>(observable.subscribe(mReplaySubject));
     }
 
     private void unsubscribeIfOption(Subscription subscription) {
