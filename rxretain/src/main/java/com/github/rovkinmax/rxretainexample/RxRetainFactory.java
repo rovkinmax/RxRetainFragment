@@ -34,6 +34,8 @@ public final class RxRetainFactory {
     public static <T> RxRetainFragment<T> restart(FragmentManager fragmentManager, Observable<T> observable, RetainSubscriber<T> observer, String tag) {
         RxRetainFragment<T> fragment = initFragment(fragmentManager, observable, observer, tag);
         fragment.stop();
+        fragment.setObservable(observable);
+        fragment.setObserver(observer);
         fragment.start();
         return fragment;
     }
