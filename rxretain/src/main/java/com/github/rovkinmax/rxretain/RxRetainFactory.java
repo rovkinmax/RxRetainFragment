@@ -10,6 +10,9 @@ import rx.Observable;
 public final class RxRetainFactory {
     private static final String DEFAULT_TAG = "RX_RETAIN_FRAGMENT_INSTANCE";
 
+    private RxRetainFactory() {
+    }
+
     public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable) {
         return create(fragmentManager, observable, new EmptyObserver<T>());
     }
