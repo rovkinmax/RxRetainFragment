@@ -1,4 +1,4 @@
-package com.github.rovkinmax.rxretainexample;
+package com.github.rovkinmax.rxretaine;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
