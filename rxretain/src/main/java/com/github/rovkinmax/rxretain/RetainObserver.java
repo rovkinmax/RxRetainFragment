@@ -1,4 +1,4 @@
-package com.github.rovkinmax.rxretainexample;
+package com.github.rovkinmax.rxretain;
 
 import rx.Observer;
 import rx.exceptions.OnErrorNotImplementedException;

@@ -6,6 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
+import com.github.rovkinmax.rxretain.RetainObserver;
+import com.github.rovkinmax.rxretain.RxRetainFactory;
+import com.github.rovkinmax.rxretain.RxRetainFragment;
+
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
