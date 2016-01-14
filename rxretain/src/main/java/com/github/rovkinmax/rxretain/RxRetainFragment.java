@@ -14,7 +14,7 @@ import rx.functions.Action1;
 public class RxRetainFragment<T> extends Fragment {
 
     private RxRetainManager<T> mManager;
-    private RxLifecycleCallback<T> mRxLifecycleCallback = new RxLifecycleCallback<>(this);
+    private RxLifecycleCallback<T> mRxLifecycleCallback = new RxLifecycleCallback<>();
 
     public RxRetainFragment() {
     }
@@ -22,6 +22,7 @@ public class RxRetainFragment<T> extends Fragment {
     @SuppressLint("ValidFragment")
     RxRetainFragment(Observable<T> observable) {
         mManager = new RxRetainManager<>(observable);
+        mRxLifecycleCallback.setManager(mManager);
     }
 
 

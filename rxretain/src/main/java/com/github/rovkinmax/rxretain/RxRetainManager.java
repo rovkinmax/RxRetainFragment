@@ -14,7 +14,7 @@ import rx.subscriptions.CompositeSubscription;
  */
 class RxRetainManager<T> {
     private ReplaySubject<T> mReplaySubject;
-    private Subscription mReplaySubscription;
+    private WeakReference<Subscription> mRefReplaySubscription;
 
     private CompositeSubscription mCurrentSubscriptions = new CompositeSubscription();
     private WeakReference<Observable<T>> mRefObservable;
@@ -48,7 +48,7 @@ class RxRetainManager<T> {
             mReplaySubject = ReplaySubject.create();
             subscribeObserver();
             if (hasObservable()) {
-                mReplaySubscription = getObservable().subscribe(mReplaySubject);
+                mRefReplaySubscription = new WeakReference<>(getObservable().subscribe(mReplaySubject));
             } else {
                 throw new RuntimeException("Can't run. First you must create RxRetainFragment with not null observer");
             }
@@ -80,9 +80,16 @@ class RxRetainManager<T> {
 
     public void stop() {
         unsubscribeCurrentIfOption();
-        unsubscribeIfOption(mReplaySubscription);
-        mReplaySubscription = null;
+        unsubscribeIfOption(getReplaySubscription());
+        mRefReplaySubscription = null;
         mReplaySubject = null;
+    }
+
+    private Subscription getReplaySubscription() {
+        if (mRefReplaySubscription == null) {
+            return null;
+        }
+        return mRefReplaySubscription.get();
     }
 
     public void unsubscribeCurrentIfOption() {

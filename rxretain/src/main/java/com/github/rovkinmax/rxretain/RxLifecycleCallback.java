@@ -8,10 +8,10 @@ import android.os.Bundle;
  * @author Rovkin Max
  */
 public class RxLifecycleCallback<T> implements Application.ActivityLifecycleCallbacks {
-    private RxRetainFragment<T> mRxRetainFragment;
+    private RxRetainManager<T> mManager;
 
-    public RxLifecycleCallback(RxRetainFragment<T> rxRetainFragment) {
-        mRxRetainFragment = rxRetainFragment;
+    public RxLifecycleCallback() {
+
     }
 
     @Override
@@ -31,7 +31,7 @@ public class RxLifecycleCallback<T> implements Application.ActivityLifecycleCall
 
     @Override
     public void onActivityPaused(Activity activity) {
-        mRxRetainFragment.getManager().unsubscribeCurrentIfOption();
+        mManager.unsubscribeCurrentIfOption();
     }
 
     @Override
@@ -47,5 +47,9 @@ public class RxLifecycleCallback<T> implements Application.ActivityLifecycleCall
     @Override
     public void onActivityDestroyed(Activity activity) {
 
+    }
+
+    public void setManager(RxRetainManager<T> manager) {
+        mManager = manager;
     }
 }
