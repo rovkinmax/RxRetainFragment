@@ -26,6 +26,12 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="restartObservable"
+        android:text="Restart by click"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:onClick="restartIfError"
         android:text="Restart if error"/>
 

@@ -34,6 +34,11 @@ public class MainActivity extends AppCompatActivity {
                 .subscribe(buildPrintAction());
     }
 
+    public void restartObservable(View v) {
+        RxRetainFactory.restart(getFragmentManager(), initReadyToUserObservable(-10, 0), null)
+                .subscribe(buildPrintAction());
+    }
+
     public void restartIfError(View v) {
         startObservable(-1);
     }

@@ -68,9 +68,9 @@ public class RxRetainFragment<T> extends Fragment {
     }
 
     public void start() {
+        initObserverIfNull();
         if (mReplaySubject == null) {
             mReplaySubject = ReplaySubject.create();
-            initObserverIfNull();
             subscribeObserver();
             if (hasObservable()) {
                 mRefReplaySubscription = new WeakReference<>(getObservable().subscribe(mReplaySubject));
@@ -84,9 +84,6 @@ public class RxRetainFragment<T> extends Fragment {
     private void initObserverIfNull() {
         if (!hasObserver()) {
             setObserver(new EmptySubscriber<T>());
-        }
-        if (mRefReplaySubscription != null) {
-            unsubscribeIfOption(mRefReplaySubscription.get());
         }
     }
 
