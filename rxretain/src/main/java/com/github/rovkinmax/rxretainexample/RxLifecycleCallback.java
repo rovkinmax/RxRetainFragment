@@ -31,7 +31,7 @@ public class RxLifecycleCallback<T> implements Application.ActivityLifecycleCall
 
     @Override
     public void onActivityPaused(Activity activity) {
-        mRxRetainFragment.unsubscribeCurrentIfOption();
+        mRxRetainFragment.getManager().unsubscribeCurrentIfOption();
     }
 
     @Override

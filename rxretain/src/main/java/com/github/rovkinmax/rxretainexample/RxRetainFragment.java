@@ -30,15 +30,13 @@ public class RxRetainFragment<T> extends Fragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         if (isAdded()) {
+            getActivity().getApplication().unregisterActivityLifecycleCallbacks(mRxLifecycleCallback);
             getActivity().getApplication().registerActivityLifecycleCallbacks(mRxLifecycleCallback);
         }
     }
 
     @Override
     public void onStop() {
-        if (isAdded()) {
-            getActivity().getApplication().unregisterActivityLifecycleCallbacks(mRxLifecycleCallback);
-        }
         super.onStop();
     }
 
@@ -54,23 +52,7 @@ public class RxRetainFragment<T> extends Fragment {
         mManager.start();
     }
 
-    void setObserver(RetainSubscriber<T> observer) {
-        mManager.setObserver(observer);
-    }
-
-    void setObservable(Observable<T> observable) {
-        mManager.setObservable(observable);
-    }
-
-    void stop() {
-        mManager.stop();
-    }
-
-    void unsubscribeCurrentIfOption() {
-        mManager.unsubscribeCurrentIfOption();
-    }
-
-    boolean hasObservable() {
-        return mManager.hasObservable();
+    RxRetainManager<T> getManager() {
+        return mManager;
     }
 }

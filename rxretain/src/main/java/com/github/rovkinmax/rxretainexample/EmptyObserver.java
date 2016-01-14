@@ -3,7 +3,7 @@ package com.github.rovkinmax.rxretainexample;
 /**
  * @author Rovkin Max
  */
-public class EmptySubscriber<T> extends RetainSubscriber<T> {
+public class EmptyObserver<T> extends RetainObserver<T> {
     @Override
     public void onNext(T t) {
 

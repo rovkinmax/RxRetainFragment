@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mRotateExample = RxRetainFactory.create(getFragmentManager(), initReadyToUserObservable(10), new RetainSubscriber<Integer>() {
+        mRotateExample = RxRetainFactory.create(getFragmentManager(), initReadyToUserObservable(10), new RetainObserver<Integer>() {
             @Override
             public void onNext(Integer integer) {
                 printInt(integer);
