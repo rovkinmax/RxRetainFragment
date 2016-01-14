@@ -30,6 +30,8 @@ public abstract class RetainObserver<T> implements Observer<T> {
     public void onError(Throwable e) {
         if (mOnError == null) {
             throw new OnErrorNotImplementedException(e);
+        } else {
+            mOnError.call(e);
         }
     }
 
