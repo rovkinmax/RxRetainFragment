@@ -51,7 +51,7 @@ public class RxRetainFragment<T> extends Fragment {
     }
 
     public void subscribe(Subscriber<T> subscriber) {
-
+        mManager.subscribe(subscriber);
     }
 
     public void start() {

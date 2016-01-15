@@ -1,4 +1,17 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+buildscript {
+    ext.kotlin_version = '1.0.0-beta-3595'
+
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
+    }
+}
 
 android {
     compileSdkVersion 23
@@ -20,9 +33,14 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
+    testCompile 'org.robolectric:robolectric:3.0'
+    testCompile 'org.mockito:mockito-core:2.0.31-beta'
+
     compile project(':rxretain')
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'io.reactivex:rxandroid:1.1.0'
+    compile 'io.reactivex:rxkotlin:0.30.1'
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
