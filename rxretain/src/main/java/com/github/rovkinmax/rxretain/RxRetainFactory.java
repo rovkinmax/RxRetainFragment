@@ -3,6 +3,7 @@ package com.github.rovkinmax.rxretain;
 import android.app.FragmentManager;
 
 import rx.Observable;
+import rx.Subscriber;
 
 /**
  * @author Rovkin Max
@@ -17,11 +18,11 @@ public final class RxRetainFactory {
         return create(fragmentManager, observable, new EmptyObserver<T>());
     }
 
-    public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable, RetainObserver<T> observer) {
+    public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer) {
         return create(fragmentManager, observable, observer, DEFAULT_TAG);
     }
 
-    public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable, RetainObserver<T> observer, String tag) {
+    public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer, String tag) {
         return initFragment(fragmentManager, observable, observer, tag);
     }
 
@@ -30,11 +31,11 @@ public final class RxRetainFactory {
         return restart(fragmentManager, observable, new EmptyObserver<T>());
     }
 
-    public static <T> RxRetainFragment<T> restart(FragmentManager fragmentManager, Observable<T> observable, RetainObserver<T> observer) {
+    public static <T> RxRetainFragment<T> restart(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer) {
         return restart(fragmentManager, observable, observer, DEFAULT_TAG);
     }
 
-    public static <T> RxRetainFragment<T> restart(FragmentManager fragmentManager, Observable<T> observable, RetainObserver<T> observer, String tag) {
+    public static <T> RxRetainFragment<T> restart(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer, String tag) {
         RxRetainFragment<T> fragment = initFragment(fragmentManager, observable, observer, tag);
         fragment.getManager().stop();
         fragment.getManager().setObservable(observable);
@@ -47,13 +48,13 @@ public final class RxRetainFactory {
         return start(fragmentManager, observable, observer, DEFAULT_TAG);
     }
 
-    public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable, RetainObserver<T> observer, String tag) {
+    public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer, String tag) {
         RxRetainFragment<T> fragment = initFragment(fragmentManager, observable, observer, tag);
         fragment.start();
         return fragment;
     }
 
-    private static <T> RxRetainFragment<T> initFragment(FragmentManager fragmentManager, Observable<T> observable, RetainObserver<T> observer, String tag) {
+    private static <T> RxRetainFragment<T> initFragment(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer, String tag) {
         RxRetainFragment<T> fragment = getFragmentByTag(fragmentManager, tag);
         if (fragment == null) {
             fragment = new RxRetainFragment<>(observable);

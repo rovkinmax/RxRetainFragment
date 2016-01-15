@@ -3,6 +3,7 @@ package com.github.rovkinmax.rxretain;
 import java.lang.ref.WeakReference;
 
 import rx.Observable;
+import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action0;
 import rx.functions.Action1;
@@ -18,7 +19,7 @@ class RxRetainManager<T> {
 
     private CompositeSubscription mCurrentSubscriptions = new CompositeSubscription();
     private WeakReference<Observable<T>> mRefObservable;
-    private WeakReference<RetainObserver<T>> mRefObserver;
+    private WeakReference<Subscriber<T>> mRefObserver;
 
 
     public RxRetainManager(Observable<T> observable) {
@@ -38,8 +39,12 @@ class RxRetainManager<T> {
 
     public void subscribe(Action1<T> onNext, Action1<Throwable> onError, Action0 onCompleted) {
         start();
-        mRefObserver.get().setOnError(onError);
         addCurrentSubscription(mReplaySubject.subscribe(onNext, onError, onCompleted));
+    }
+
+    public void subscribe(final Subscriber<T> subscriber) {
+        start();
+        addCurrentSubscription(mReplaySubject.subscribe(subscriber));
     }
 
     public void start() {
@@ -62,10 +67,10 @@ class RxRetainManager<T> {
         }
     }
 
-    public void setObserver(RetainObserver<T> observer) {
+    public void setObserver(Subscriber<T> observer) {
         mRefObserver = new WeakReference<>(observer);
         if (mReplaySubject != null && observer != null) {
-            observer.onStarted();
+            observer.onStart();
             subscribeObserver();
         }
     }
@@ -106,7 +111,7 @@ class RxRetainManager<T> {
         return mRefObserver != null && getObserver() != null;
     }
 
-    private RetainObserver<T> getObserver() {
+    private Subscriber<T> getObserver() {
         return mRefObserver.get();
     }
 

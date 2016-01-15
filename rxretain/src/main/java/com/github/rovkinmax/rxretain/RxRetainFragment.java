@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.os.Bundle;
 
 import rx.Observable;
+import rx.Subscriber;
 import rx.functions.Action0;
 import rx.functions.Action1;
 
@@ -47,6 +48,10 @@ public class RxRetainFragment<T> extends Fragment {
 
     public void subscribe(Action1<T> onNext, Action1<Throwable> onError, Action0 onCompleted) {
         mManager.subscribe(onNext, onError, onCompleted);
+    }
+
+    public void subscribe(Subscriber<T> subscriber) {
+
     }
 
     public void start() {

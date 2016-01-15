@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
-import com.github.rovkinmax.rxretain.RetainObserver;
+import com.github.rovkinmax.rxretain.EmptyObserver;
 import com.github.rovkinmax.rxretain.RxRetainFactory;
 import com.github.rovkinmax.rxretain.RxRetainFragment;
 
@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mRotateExample = RxRetainFactory.create(getFragmentManager(), initReadyToUserObservable(10), new RetainObserver<Integer>() {
+        mRotateExample = RxRetainFactory.create(getFragmentManager(), initReadyToUserObservable(10), new EmptyObserver<Integer>() {
             @Override
             public void onNext(Integer integer) {
                 printInt(integer);
