@@ -29,13 +29,26 @@ class ActivityTest {
 
     @Test
     fun testSimpleRun() {
-        val fragment = activity.createRetainFragment(Observable.create { for (i in 0..9) it.onNext(i); it.onCompleted() })
+        val fragment = activity.createRetainFragment(Observable.range(0, 10))
         val testSubscriber = TestSubscriber<Int>()
         fragment.subscribe(testSubscriber)
 
         testSubscriber.assertCompleted()
         testSubscriber.assertNoErrors()
-        Assert.assertEquals(testSubscriber.onNextEvents.size, 10)
+        testSubscriber.assertValueCount(10)
+        Assert.assertEquals(testSubscriber.onNextEvents, (0..9).toArrayList())
 
+    }
+
+    @Test
+    fun testThreadSimpleRun() {
+        val observableThread = Observable.range(0, 10).bindToThread()
+        val testSubscriber = TestSubscriber<Int>()
+        activity.createRetainFragment(observableThread).subscribe(testSubscriber)
+
+        testSubscriber.awaitTerminalEvent()
+        testSubscriber.assertCompleted()
+        testSubscriber.assertValueCount(10)
+        Assert.assertEquals(testSubscriber.onNextEvents, (0..9).toArrayList())
     }
 }
