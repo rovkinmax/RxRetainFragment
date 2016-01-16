@@ -61,6 +61,8 @@ public final class RxRetainFactory {
 
     public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer, String tag) {
         RxRetainFragment<T> fragment = initFragment(fragmentManager, observable, observer, tag);
+        fragment.getManager().unsubscribeCurrentIfOption();
+        fragment.getManager().setObserver(observer);
         fragment.getManager().start();
         return fragment;
     }

@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
  */
 @Config(constants = BuildConfig::class, sdk = intArrayOf(21))
 @RunWith(RobolectricGradleTestRunner::class)
-class ActivityTest {
+class SimpleActivityTest {
 
     private lateinit var activity: Activity
     private lateinit var controller: ActivityController<Activity>
@@ -35,8 +35,7 @@ class ActivityTest {
     @Test
     fun testSimpleRun() {
         val testSubscriber = TestSubscriber<Int>()
-        val fragment = RxRetainFactory.create(fragmentManager, Observable.range(0, 10), testSubscriber)
-        fragment.subscribe()
+        RxRetainFactory.start(fragmentManager, Observable.range(0, 10), testSubscriber)
 
         testSubscriber.assertCompleted()
         testSubscriber.assertNoErrors()
@@ -49,7 +48,7 @@ class ActivityTest {
     fun testThreadSimpleRun() {
         val observableThread = Observable.range(0, 10).bindToThread()
         val testSubscriber = TestSubscriber<Int>()
-        RxRetainFactory.create(fragmentManager, observableThread, testSubscriber).subscribe()
+        RxRetainFactory.start(fragmentManager, observableThread, testSubscriber)
 
         testSubscriber.awaitTerminalEvent()
         testSubscriber.assertCompleted()
@@ -68,6 +67,7 @@ class ActivityTest {
 
         testSubscriber = Mockito.spy(TestSubscriber<Long>())
         RxRetainFactory.start(fragmentManager, Observable.range(0, 10).map { it.toLong() }.bindToThread(), testSubscriber)
+
         testSubscriber.awaitTerminalEvent()
 
         Mockito.verify(testSubscriber).onStart()
@@ -84,13 +84,11 @@ class ActivityTest {
 
         testSubscriber = Mockito.spy(TestSubscriber<Long>())
         RxRetainFactory.restart(fragmentManager, Observable.range(0, 10).map { it.toLong() }.bindToThread(), testSubscriber)
+        Mockito.verify(testSubscriber).onStart()
         testSubscriber.awaitTerminalEvent()
 
-        Mockito.verify(testSubscriber).onStart()
         testSubscriber.assertCompleted()
         testSubscriber.assertValueCount(10)
         testSubscriber.assertReceivedOnNext(((0L)..(9L)).toArrayList())
     }
-
-
 }
