@@ -63,17 +63,15 @@ class SimpleActivityTest {
         RxRetainFactory.start(fragmentManager, Observable.timer(5, TimeUnit.SECONDS).bindToThread(), testSubscriber)
         testSubscriber.awaitTerminalEvent(2, TimeUnit.SECONDS)
 
-        testSubscriber.unsubscribe()
+        val spySubscribers = Mockito.spy(TestSubscriber<Long>())
+        RxRetainFactory.start(fragmentManager, Observable.range(0, 10).map { it.toLong() }.bindToThread(), spySubscribers)
+        testSubscriber.assertUnsubscribed()
+        spySubscribers.awaitTerminalEvent()
 
-        testSubscriber = Mockito.spy(TestSubscriber<Long>())
-        RxRetainFactory.start(fragmentManager, Observable.range(0, 10).map { it.toLong() }.bindToThread(), testSubscriber)
-
-        testSubscriber.awaitTerminalEvent()
-
-        Mockito.verify(testSubscriber).onStart()
-        testSubscriber.assertCompleted()
-        testSubscriber.assertValueCount(1)
-        testSubscriber.assertReceivedOnNext(arrayListOf(0.toLong()))
+        Mockito.verify(spySubscribers).onStart()
+        spySubscribers.assertCompleted()
+        spySubscribers.assertValueCount(1)
+        spySubscribers.assertReceivedOnNext(arrayListOf(0.toLong()))
     }
 
     @Test
