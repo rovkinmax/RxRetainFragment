@@ -90,4 +90,21 @@ class SimpleActivityTest {
         spySubscribers.assertValueCount(10)
         spySubscribers.assertReceivedOnNext(((0L)..(9L)).toArrayList())
     }
+
+    @Test
+    fun testStartWithTwoDifferentTags() {
+        val firstSubscriber = TestSubscriber<Long>()
+        RxRetainFactory.start(fragmentManager, Observable.timer(5, TimeUnit.SECONDS).bindToThread(), firstSubscriber, "first tag")
+        firstSubscriber.awaitTerminalEvent(2, TimeUnit.SECONDS)
+
+        val secondSubscriber = TestSubscriber<Long>()
+        RxRetainFactory.start(fragmentManager, Observable.timer(5, TimeUnit.SECONDS).bindToThread(), secondSubscriber, "second tag")
+        secondSubscriber.awaitTerminalEvent()
+        if (!firstSubscriber.isUnsubscribed) {
+            firstSubscriber.awaitTerminalEvent()
+        }
+
+        firstSubscriber.assertCompleted()
+        secondSubscriber.assertCompleted()
+    }
 }
