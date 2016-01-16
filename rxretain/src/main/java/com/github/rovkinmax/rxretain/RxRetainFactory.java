@@ -44,7 +44,11 @@ public final class RxRetainFactory {
         return fragment;
     }
 
-    public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable, EmptyObserver<T> observer) {
+    public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable) {
+        return start(fragmentManager, observable, new EmptyObserver<T>());
+    }
+
+    public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer) {
         return start(fragmentManager, observable, observer, DEFAULT_TAG);
     }
 
