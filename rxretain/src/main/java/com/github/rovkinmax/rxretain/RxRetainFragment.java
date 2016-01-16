@@ -54,8 +54,9 @@ public class RxRetainFragment<T> extends Fragment {
      * Subscribes to an ReplayObject which subscribed on Observable and provides a callback to handle the items it emits.
      *
      * @param onNext the {@code Action1<T>} you have designed to accept emissions from the Observable
-     * @throws IllegalArgumentException if {@code onNext} is null
-     *                                  if the Observable calls {@code onError}
+     * @throws IllegalArgumentException       if {@code onNext} is null
+     *                                        if the Observable calls {@code onError}
+     * @throws OnErrorNotImplementedException if the Observable calls {@code onError}
      * @see <a href="http://reactivex.io/documentation/operators/subscribe.html">ReactiveX operators documentation: Subscribe</a>
      */
     public RxRetainFragment<T> subscribe(Action1<T> onNext) {

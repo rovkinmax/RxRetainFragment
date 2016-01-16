@@ -18,6 +18,10 @@ public final class RxRetainFactory {
         return create(fragmentManager, observable, new EmptyObserver<T>());
     }
 
+    public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable, String tag) {
+        return create(fragmentManager, observable, new EmptyObserver<T>(), tag);
+    }
+
     public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer) {
         return create(fragmentManager, observable, observer, DEFAULT_TAG);
     }

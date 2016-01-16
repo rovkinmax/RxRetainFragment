@@ -2,7 +2,10 @@ package com.github.rovkinmax.rxretainexample
 
 import android.app.Activity
 import android.app.FragmentManager
+import com.github.rovkinmax.rxretain.EmptyObserver
 import com.github.rovkinmax.rxretain.RxRetainFactory
+import com.github.rovkinmax.rxretain.RxRetainFragment
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -12,7 +15,11 @@ import org.robolectric.RobolectricGradleTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.util.ActivityController
 import rx.Observable
+import rx.Subscriber
+import rx.exceptions.OnErrorNotImplementedException
+import rx.observers.TestObserver
 import rx.observers.TestSubscriber
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -54,6 +61,105 @@ class SimpleActivityTest {
         testSubscriber.assertCompleted()
         testSubscriber.assertValueCount(10)
         testSubscriber.assertReceivedOnNext((0..9).toArrayList())
+    }
+
+
+    @Test
+    public fun testRunByEmptySubscribe() {
+        val firstSubscriber = TestSubscriber<Int>()
+        createFragmentWithTimer("first", firstSubscriber).subscribe()
+        firstSubscriber.assertCompleted()
+        firstSubscriber.assertReceivedOnNext((0..9).toArrayList())
+    }
+
+    @Test
+    public fun testErrorWithEmptySubscribeMethod() {
+        val firstSubscriber = TestSubscriber<Int>()
+        createFragmentWithOnErrorAction("second", firstSubscriber, TestException("Expected exception")).subscribe()
+        firstSubscriber.assertError(TestException("Expected exception"))
+    }
+
+    @Test
+    public fun testRunBySubscribeWithOnNextAction() {
+        val list = ArrayList<Int>()
+        createFragmentWithTimer("first").subscribe({ list.add(it) })
+        Assert.assertEquals((0..9).toArrayList(), list)
+    }
+
+    @Test
+    fun testErrorWithSubscribeOnNextAction() {
+        var error: Throwable? = null
+        try {
+            createFragmentWithOnErrorAction("second", exception = TestException("Expected exception"))
+                    .subscribe({ })
+        } catch(e: OnErrorNotImplementedException) {
+            error = e
+        }
+        Assert.assertNotNull(error)
+    }
+
+    @Test
+    public fun testRunBySubscribeWithThreeCallbacks() {
+        var isCompleted = false
+        createFragmentWithTimer("second").subscribe({}, {}, { isCompleted = true })
+        Assert.assertTrue(isCompleted)
+    }
+
+    @Test
+    fun testErrorWithSubscribeByTreeCallbacks() {
+        var isOnNextCalled = false
+        var isCompleted = false
+        var exception: Throwable? = null
+
+        createFragmentWithOnErrorAction("second", exception = TestException("Expected exception"))
+                .subscribe({ isOnNextCalled = true }, { exception = it }, { isCompleted = true })
+
+        Assert.assertFalse(isOnNextCalled)
+        Assert.assertFalse(isCompleted)
+        Assert.assertEquals(TestException("Expected exception"), exception)
+    }
+
+    @Test
+    public fun testRunBySubscribeWithObserver() {
+        val testObserver = TestObserver<Int>()
+        createFragmentWithTimer("first").subscribe(testObserver)
+        testObserver.assertTerminalEvent()
+        testObserver.assertReceivedOnNext((0..9).toArrayList())
+    }
+
+    @Test
+    fun testErrorWithObserverSubscription() {
+        val testObserver = TestObserver<Int>()
+        createFragmentWithOnErrorAction("second", exception = TestException("Expected exception"))
+                .subscribe(testObserver)
+        testObserver.assertTerminalEvent()
+        Assert.assertEquals(arrayListOf(TestException("Expected exception")), testObserver.onErrorEvents)
+    }
+
+    @Test
+    public fun testRunBySubscribeWithSubscriber() {
+        val testSubscriber = TestSubscriber<Int>()
+        createFragmentWithTimer("first").subscribe(testSubscriber)
+        testSubscriber.assertCompleted()
+        testSubscriber.assertReceivedOnNext((0..9).toArrayList())
+    }
+
+
+    @Test
+    fun testErrorWithSubscriberSubscription() {
+        val testSubscriber = TestSubscriber<Int>()
+        createFragmentWithOnErrorAction("second", exception = TestException("Expected exception"))
+                .subscribe(testSubscriber)
+        testSubscriber.assertTerminalEvent()
+        testSubscriber.assertError(TestException("Expected exception"))
+    }
+
+    private fun createFragmentWithTimer(tag: String, subscriber: Subscriber<Int> = EmptyObserver<Int>()): RxRetainFragment<Int> {
+        return RxRetainFactory.create(fragmentManager, Observable.range(0, 10), subscriber, tag)
+    }
+
+    private fun createFragmentWithOnErrorAction(tag: String, subscriber: Subscriber<Int> = EmptyObserver<Int>(), exception: Throwable): RxRetainFragment<Int> {
+        return RxRetainFactory.create(fragmentManager, Observable.create { throw exception }, subscriber, tag)
     }
 
     @Test
@@ -107,4 +213,20 @@ class SimpleActivityTest {
         firstSubscriber.assertCompleted()
         secondSubscriber.assertCompleted()
     }
+}
+
+class TestException(detailMessage: String?) : RuntimeException(detailMessage) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other?.javaClass != javaClass) return false
+        if (other !is TestException) return false
+        if (!(message?.equals(other.message) ?: false)) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return message?.hashCode() ?: 0
+    }
+
+
 }
