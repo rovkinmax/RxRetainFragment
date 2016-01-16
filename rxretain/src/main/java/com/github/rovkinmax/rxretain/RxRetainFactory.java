@@ -37,11 +37,18 @@ public final class RxRetainFactory {
 
     public static <T> RxRetainFragment<T> restart(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer, String tag) {
         RxRetainFragment<T> fragment = initFragment(fragmentManager, observable, observer, tag);
-        fragment.getManager().stop();
+        fragment.unsubscribe();
         fragment.getManager().setObservable(observable);
         fragment.getManager().setObserver(observer);
-        fragment.start();
+        fragment.getManager().start();
         return fragment;
+    }
+
+    private static <T> void removeFragmentIfExist(FragmentManager fragmentManager, String tag) {
+        RxRetainFragment<T> fragment = getFragmentByTag(fragmentManager, tag);
+        if (fragment != null) {
+            fragmentManager.beginTransaction().remove(fragment).commit();
+        }
     }
 
     public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable) {
@@ -54,7 +61,7 @@ public final class RxRetainFactory {
 
     public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer, String tag) {
         RxRetainFragment<T> fragment = initFragment(fragmentManager, observable, observer, tag);
-        fragment.start();
+        fragment.getManager().start();
         return fragment;
     }
 
@@ -67,7 +74,9 @@ public final class RxRetainFactory {
         if (!fragment.getManager().hasObservable()) {
             fragment.getManager().setObservable(observable);
         }
-        fragment.getManager().setObserver(observer);
+        if (!fragment.getManager().hasObserver()) {
+            fragment.getManager().setObserver(observer);
+        }
         return fragment;
     }
 

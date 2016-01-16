@@ -24,7 +24,6 @@ class RxRetainManager<T> {
 
     public RxRetainManager(Observable<T> observable) {
         setObservable(observable);
-        setObserver(new EmptyObserver<T>());
     }
 
     public void setObservable(Observable<T> observable) {
@@ -48,22 +47,14 @@ class RxRetainManager<T> {
     }
 
     public void start() {
-        initObserverIfNull();
         if (mReplaySubject == null) {
             mReplaySubject = ReplaySubject.create();
-            subscribeObserver();
             if (hasObservable()) {
                 mRefReplaySubscription = new WeakReference<>(getObservable().subscribe(mReplaySubject));
             } else {
                 throw new RuntimeException("Can't run. First you must create RxRetainFragment with not null observer");
             }
-        }
-    }
-
-
-    private void initObserverIfNull() {
-        if (!hasObserver()) {
-            setObserver(new EmptyObserver<T>());
+            subscribeObserver();
         }
     }
 
@@ -75,7 +66,9 @@ class RxRetainManager<T> {
     }
 
     private void subscribeObserver() {
-        addCurrentSubscription(mReplaySubject.subscribe(getObserver()));
+        if (hasObserver()) {
+            addCurrentSubscription(mReplaySubject.subscribe(getObserver()));
+        }
     }
 
     private void addCurrentSubscription(Subscription subscription) {

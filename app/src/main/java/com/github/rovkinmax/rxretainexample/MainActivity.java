@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void rotateExample(View view) {
-        mRotateExample.start();
+        mRotateExample.subscribe();
     }
 
     private Observable<Integer> initReadyToUserObservable(int count) {

@@ -22,10 +22,8 @@ public class RxRetainFragment<T> extends Fragment {
 
     @SuppressLint("ValidFragment")
     RxRetainFragment(Observable<T> observable) {
-        mManager = new RxRetainManager<>(observable);
-        mRxLifecycleCallback.setManager(mManager);
+        createNewManager(observable);
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,15 +48,24 @@ public class RxRetainFragment<T> extends Fragment {
         mManager.subscribe(onNext, onError, onCompleted);
     }
 
+    public void subscribe() {
+        mManager.subscribe(new EmptyObserver<T>());
+    }
+
     public void subscribe(Subscriber<T> subscriber) {
         mManager.subscribe(subscriber);
     }
 
-    public void start() {
-        mManager.start();
-    }
-
     RxRetainManager<T> getManager() {
         return mManager;
+    }
+
+    public void unsubscribe() {
+        mManager.stop();
+    }
+
+    private void createNewManager(Observable<T> observable) {
+        mManager = new RxRetainManager<>(observable);
+        mRxLifecycleCallback.setManager(mManager);
     }
 }
