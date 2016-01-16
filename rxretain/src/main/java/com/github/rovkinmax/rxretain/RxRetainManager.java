@@ -70,7 +70,6 @@ class RxRetainManager<T> {
     public void setObserver(Subscriber<T> observer) {
         mRefObserver = new WeakReference<>(observer);
         if (mReplaySubject != null && observer != null) {
-            observer.onStart();
             subscribeObserver();
         }
     }
