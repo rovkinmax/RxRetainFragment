@@ -3,6 +3,7 @@ package com.github.rovkinmax.rxretain;
 import java.lang.ref.WeakReference;
 
 import rx.Observable;
+import rx.Observer;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action0;
@@ -30,7 +31,6 @@ class RxRetainManager<T> {
         mRefObservable = new WeakReference<>(observable);
     }
 
-
     public void subscribe(Action1<T> onNext) {
         start();
         addCurrentSubscription(mReplaySubject.subscribe(onNext));
@@ -44,6 +44,11 @@ class RxRetainManager<T> {
     public void subscribe(final Subscriber<T> subscriber) {
         start();
         addCurrentSubscription(mReplaySubject.subscribe(subscriber));
+    }
+
+    public void subscribe(final Observer<T> observer) {
+        start();
+        addCurrentSubscription(mReplaySubject.subscribe(observer));
     }
 
     public void start() {

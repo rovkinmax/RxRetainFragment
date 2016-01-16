@@ -78,17 +78,18 @@ class SimpleActivityTest {
 
     @Test
     fun testRestartObservable() {
-        var testSubscriber = TestSubscriber<Long>()
-        RxRetainFactory.start(fragmentManager, Observable.timer(100, TimeUnit.SECONDS).bindToThread(), testSubscriber)
+        val testSubscriber = TestSubscriber<Long>()
+        RxRetainFactory.start(fragmentManager, Observable.timer(5, TimeUnit.SECONDS).bindToThread(), testSubscriber)
         testSubscriber.awaitTerminalEvent(2, TimeUnit.SECONDS)
 
-        testSubscriber = Mockito.spy(TestSubscriber<Long>())
-        RxRetainFactory.restart(fragmentManager, Observable.range(0, 10).map { it.toLong() }.bindToThread(), testSubscriber)
-        Mockito.verify(testSubscriber).onStart()
-        testSubscriber.awaitTerminalEvent()
+        val spySubscribers = Mockito.spy(TestSubscriber<Long>())
+        RxRetainFactory.restart(fragmentManager, Observable.range(0, 10).map { it.toLong() }.bindToThread(), spySubscribers)
+        testSubscriber.assertUnsubscribed()
+        Mockito.verify(spySubscribers).onStart()
+        spySubscribers.awaitTerminalEvent()
 
-        testSubscriber.assertCompleted()
-        testSubscriber.assertValueCount(10)
-        testSubscriber.assertReceivedOnNext(((0L)..(9L)).toArrayList())
+        spySubscribers.assertCompleted()
+        spySubscribers.assertValueCount(10)
+        spySubscribers.assertReceivedOnNext(((0L)..(9L)).toArrayList())
     }
 }
