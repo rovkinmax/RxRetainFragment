@@ -217,12 +217,32 @@ class SimpleActivityTest {
     @Test
     fun testUnsubscribeMethod() {
         val testSubscriber = TestSubscriber<Long>()
-        val fragment = RxRetainFactory.start(fragmentManager, Observable.timer(50, TimeUnit.SECONDS), testSubscriber)
+        val fragment = RxRetainFactory.start(fragmentManager, Observable.timer(50, TimeUnit.SECONDS).bindToThread(), testSubscriber)
 
         testSubscriber.awaitTerminalEvent(2, TimeUnit.SECONDS)
         fragment.unsubscribe()
 
         testSubscriber.assertUnsubscribed()
         testSubscriber.assertNoTerminalEvent()
+    }
+
+    @Test
+    fun testSubscribeAfterUnsubscribe() {
+        val testSubscriber = TestSubscriber<Int>()
+        val fragment = RxRetainFactory.start(fragmentManager, rangeWithDelay(0, 10).bindToThread(), testSubscriber)
+
+        testSubscriber.awaitTerminalEvent(2, TimeUnit.SECONDS)
+        fragment.unsubscribe()
+
+        testSubscriber.assertUnsubscribed()
+        testSubscriber.assertNoTerminalEvent()
+
+        val secondSubscriber = TestSubscriber<Int>()
+        fragment.subscribe(secondSubscriber)
+        secondSubscriber.awaitTerminalEvent()
+
+        secondSubscriber.assertCompleted()
+        secondSubscriber.assertReceivedOnNext((0..9).toArrayList())
+
     }
 }
