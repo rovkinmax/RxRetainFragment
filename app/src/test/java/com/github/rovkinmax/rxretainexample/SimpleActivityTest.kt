@@ -213,4 +213,16 @@ class SimpleActivityTest {
         firstSubscriber.assertCompleted()
         secondSubscriber.assertCompleted()
     }
+
+    @Test
+    fun testUnsubscribeMethod() {
+        val testSubscriber = TestSubscriber<Long>()
+        val fragment = RxRetainFactory.start(fragmentManager, Observable.timer(50, TimeUnit.SECONDS), testSubscriber)
+
+        testSubscriber.awaitTerminalEvent(2, TimeUnit.SECONDS)
+        fragment.unsubscribe()
+
+        testSubscriber.assertUnsubscribed()
+        testSubscriber.assertNoTerminalEvent()
+    }
 }

@@ -138,7 +138,7 @@ public class RxRetainFragment<T> extends Fragment {
     }
 
     /**
-     * Stop execution of Observable. It work like {@link Subscription#unsubscribe()}
+     * Stop execution of Observable.
      */
     public void unsubscribe() {
         mManager.stop();
