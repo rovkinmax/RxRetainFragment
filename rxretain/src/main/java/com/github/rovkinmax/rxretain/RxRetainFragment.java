@@ -33,12 +33,14 @@ public class RxRetainFragment<T> extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        if (isAdded()) {
-            getActivity().getApplication().unregisterActivityLifecycleCallbacks(mRxLifecycleCallback);
-            getActivity().getApplication().registerActivityLifecycleCallbacks(mRxLifecycleCallback);
-        }
+        getActivity().getApplication().registerActivityLifecycleCallbacks(mRxLifecycleCallback);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getActivity().getApplication().unregisterActivityLifecycleCallbacks(mRxLifecycleCallback);
+    }
 
     /**
      * Subscribes to an ReplayObject which subscribed on Observable and ignores {@code onNext}, {@code onCompleted} and {@code onError} emissions.
