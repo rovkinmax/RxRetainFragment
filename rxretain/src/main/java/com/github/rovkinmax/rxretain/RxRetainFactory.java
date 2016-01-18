@@ -22,12 +22,16 @@ public final class RxRetainFactory {
         return create(fragmentManager, observable, new EmptyObserver<T>(), tag);
     }
 
-    public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer) {
-        return create(fragmentManager, observable, observer, DEFAULT_TAG);
+    public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> subscriber) {
+        return create(fragmentManager, observable, subscriber, DEFAULT_TAG);
     }
 
-    public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer, String tag) {
-        return initFragment(fragmentManager, observable, observer, tag);
+    public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> subscriber, String tag) {
+        RxRetainFragment<T> fragment = initFragment(fragmentManager, observable, tag);
+        if (!fragment.getManager().hasSubscriber()) {
+            fragment.getManager().setSubscriber(subscriber);
+        }
+        return fragment;
     }
 
 
@@ -35,43 +39,47 @@ public final class RxRetainFactory {
         return restart(fragmentManager, observable, new EmptyObserver<T>());
     }
 
-    public static <T> RxRetainFragment<T> restart(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer) {
-        return restart(fragmentManager, observable, observer, DEFAULT_TAG);
+    public static <T> RxRetainFragment<T> restart(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> subscriber) {
+        return restart(fragmentManager, observable, subscriber, DEFAULT_TAG);
     }
 
-    public static <T> RxRetainFragment<T> restart(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer, String tag) {
-        RxRetainFragment<T> fragment = initFragment(fragmentManager, observable, observer, tag);
+    public static <T> RxRetainFragment<T> restart(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> subscriber, String tag) {
+        RxRetainFragment<T> fragment = initFragment(fragmentManager, observable, tag);
         fragment.unsubscribe();
         fragment.getManager().setObservable(observable);
-        fragment.getManager().setObserver(observer);
+        fragment.getManager().setSubscriber(subscriber);
         fragment.getManager().start();
         return fragment;
-    }
-
-    private static <T> void removeFragmentIfExist(FragmentManager fragmentManager, String tag) {
-        RxRetainFragment<T> fragment = getFragmentByTag(fragmentManager, tag);
-        if (fragment != null) {
-            fragmentManager.beginTransaction().remove(fragment).commit();
-        }
     }
 
     public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable) {
         return start(fragmentManager, observable, new EmptyObserver<T>());
     }
 
-    public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer) {
-        return start(fragmentManager, observable, observer, DEFAULT_TAG);
+    public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> subscriber) {
+        return start(fragmentManager, observable, subscriber, DEFAULT_TAG);
     }
 
-    public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer, String tag) {
-        RxRetainFragment<T> fragment = initFragment(fragmentManager, observable, observer, tag);
+    /**
+     * Start Observer with tag or subscribe for previous if it already running. Also all subscriber will be unsubscribed.
+     * If you want subscribe without unsubscribe previous subscriber use {@link RxRetainFactory#create(FragmentManager, Observable, String)}
+     * or {@link RxRetainFactory#create(FragmentManager, Observable)} with {@link RxRetainFragment#subscribe()} methods.
+     *
+     * @param fragmentManager fragment manager current activity. need for attach fragment for activity
+     * @param observable      observable for execution. Ignoring if this method was called with the same tag.
+     * @param subscriber      the {@link Subscriber} that will handle emissions and notifications from the Observable
+     * @param tag             tag for create or find fragment
+     * @return instance of {@link RxRetainFragment}
+     */
+    public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> subscriber, String tag) {
+        RxRetainFragment<T> fragment = initFragment(fragmentManager, observable, tag);
         fragment.getManager().unsubscribeCurrentIfOption();
-        fragment.getManager().setObserver(observer);
+        fragment.getManager().setSubscriber(subscriber);
         fragment.getManager().start();
         return fragment;
     }
 
-    private static <T> RxRetainFragment<T> initFragment(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> observer, String tag) {
+    private static <T> RxRetainFragment<T> initFragment(FragmentManager fragmentManager, Observable<T> observable, String tag) {
         RxRetainFragment<T> fragment = getFragmentByTag(fragmentManager, tag);
         if (fragment == null) {
             fragment = new RxRetainFragment<>(observable);
@@ -80,9 +88,7 @@ public final class RxRetainFactory {
         if (!fragment.getManager().hasObservable()) {
             fragment.getManager().setObservable(observable);
         }
-        if (!fragment.getManager().hasObserver()) {
-            fragment.getManager().setObserver(observer);
-        }
+
         return fragment;
     }
 

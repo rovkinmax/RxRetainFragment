@@ -172,7 +172,9 @@ class SimpleActivityTest {
         val spySubscribers = Mockito.spy(TestSubscriber<Long>())
         RxRetainFactory.start(fragmentManager, Observable.range(0, 10).map { it.toLong() }.bindToThread(), spySubscribers)
         testSubscriber.assertUnsubscribed()
-        spySubscribers.awaitTerminalEvent()
+
+        if (!spySubscribers.isUnsubscribed)
+            spySubscribers.awaitTerminalEvent()
 
         Mockito.verify(spySubscribers).onStart()
         spySubscribers.assertCompleted()
@@ -227,7 +229,7 @@ class SimpleActivityTest {
     }
 
     @Test
-    fun testSubscribeAfterFragmentUnsubscribe() {
+    fun testClearCacheAfterFragmentUnsubscribe() {
         val testSubscriber = TestSubscriber<Int>()
         val fragment = RxRetainFactory.start(fragmentManager, rangeWithDelay(0, 10).bindToThread(), testSubscriber)
 
@@ -246,4 +248,41 @@ class SimpleActivityTest {
     }
 
 
+    @Test
+    fun testCacheResultAfterUnsubscribeSubscription() {
+        val testSubscriber = TestSubscriber<Int>()
+        val fragment = RxRetainFactory.start(fragmentManager, rangeWithDelay(0, 5).bindToThread(), testSubscriber)
+
+        testSubscriber.awaitTerminalEvent(2, TimeUnit.SECONDS)
+        testSubscriber.unsubscribe()
+
+        val secondSubscriber = TestSubscriber<Int>()
+        fragment.subscribe(secondSubscriber)
+        if (!secondSubscriber.isUnsubscribed) {
+            secondSubscriber.awaitTerminalEvent()
+        }
+
+        testSubscriber.assertNoTerminalEvent()
+        secondSubscriber.assertTerminalEvent()
+        secondSubscriber.assertReceivedOnNext((0..4).toArrayList())
+    }
+
+    @Test
+    fun testCacheErrorAfterUnsubscribeSubscription() {
+        val testSubscriber = TestSubscriber<Int>()
+        val fragment = RxRetainFactory.start(fragmentManager,
+                Observable.create<Int> { delayInThread(5000) ;throw TestException("ha") }.bindToThread(), testSubscriber)
+
+        testSubscriber.awaitTerminalEvent(2, TimeUnit.SECONDS)
+        testSubscriber.unsubscribe()
+
+        val secondSubscriber = TestSubscriber<Int>()
+        fragment.subscribe(secondSubscriber)
+        if (!secondSubscriber.isUnsubscribed) {
+            secondSubscriber.awaitTerminalEvent()
+        }
+
+        testSubscriber.assertNoTerminalEvent()
+        secondSubscriber.assertError(TestException("ha"))
+    }
 }

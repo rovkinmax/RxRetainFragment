@@ -20,7 +20,7 @@ class RxRetainManager<T> {
 
     private CompositeSubscription mCurrentSubscriptions = new CompositeSubscription();
     private WeakReference<Observable<T>> mRefObservable;
-    private WeakReference<Subscriber<T>> mRefObserver;
+    private WeakReference<Subscriber<T>> mRefSubcriber;
 
 
     public RxRetainManager(Observable<T> observable) {
@@ -63,18 +63,18 @@ class RxRetainManager<T> {
         }
     }
 
-    public void setObserver(Subscriber<T> observer) {
-        if (mRefObserver != null && mRefObserver.get() != observer) {
+    public void setSubscriber(Subscriber<T> observer) {
+        if (mRefSubcriber != null && mRefSubcriber.get() != observer) {
             return;
         }
-        mRefObserver = new WeakReference<>(observer);
+        mRefSubcriber = new WeakReference<>(observer);
         if (mReplaySubject != null && observer != null) {
             subscribeObserver();
         }
     }
 
     private void subscribeObserver() {
-        if (hasObserver()) {
+        if (hasSubscriber()) {
             addCurrentSubscription(mReplaySubject.subscribe(getObserver()));
         }
     }
@@ -101,18 +101,18 @@ class RxRetainManager<T> {
         unsubscribeIfOption(mCurrentSubscriptions);
         mCurrentSubscriptions.clear();
         mCurrentSubscriptions = new CompositeSubscription();
-        if (mRefObserver != null) {
-            mRefObserver.clear();
+        if (mRefSubcriber != null) {
+            mRefSubcriber.clear();
         }
-        mRefObserver = null;
+        mRefSubcriber = null;
     }
 
-    boolean hasObserver() {
-        return mRefObserver != null && getObserver() != null;
+    boolean hasSubscriber() {
+        return mRefSubcriber != null && getObserver() != null;
     }
 
     private Subscriber<T> getObserver() {
-        return mRefObserver.get();
+        return mRefSubcriber.get();
     }
 
     boolean hasObservable() {
