@@ -2,7 +2,6 @@ package com.github.rovkinmax.rxretainexample
 
 import android.app.Activity
 import android.app.FragmentManager
-import android.content.Context
 import android.content.Intent
 import android.support.test.InstrumentationRegistry
 import android.support.test.filters.SdkSuppress
@@ -34,7 +33,6 @@ class RecreationActivityTest {
     private lateinit var fragmentManager: FragmentManager
     private lateinit var activity: Activity
     private lateinit var device: UiDevice
-    private lateinit var context: Context
     private lateinit var basePackage: String
     private lateinit var solo: Solo
     @Before
@@ -43,7 +41,7 @@ class RecreationActivityTest {
         device.setOrientationNatural()
         device.unfreezeRotation()
 
-        context = InstrumentationRegistry.getContext()
+        val context = InstrumentationRegistry.getContext()
         activity = rule.launchActivity(Intent(context, TestableActivity::class.java))
         solo = Solo(InstrumentationRegistry.getInstrumentation(), activity)
         basePackage = activity.packageName
