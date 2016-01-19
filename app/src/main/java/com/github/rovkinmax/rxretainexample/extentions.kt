@@ -1,7 +1,9 @@
 package com.github.rovkinmax.rxretainexample
 
 import rx.Observable
+import rx.observers.TestSubscriber
 import rx.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
 
 /**
  * @author Rovkin Max
@@ -27,4 +29,9 @@ fun delayInThread(stepDelay: Long) {
         Thread.sleep(stepDelay)
     } catch(e: Exception) {
     }
+}
+
+fun <T> TestSubscriber<T>.awaitIfNotUnsubscribed(timeOutInSeconds: Long = 10): Unit {
+    if (!isUnsubscribed)
+        awaitTerminalEvent(timeOutInSeconds, TimeUnit.SECONDS)
 }

@@ -71,8 +71,7 @@ class RecreationActivityTest {
         //in this case may use any observable. I want use null, cause now it's ignored
         RxRetainFactory.start(fragmentManager, null, secondSubscriber)
 
-        if (!secondSubscriber.isUnsubscribed)
-            secondSubscriber.awaitTerminalEvent()
+        secondSubscriber.awaitIfNotUnsubscribed()
 
         secondSubscriber.assertCompleted()
         secondSubscriber.assertReceivedOnNext((0..9).toArrayList())
@@ -82,17 +81,50 @@ class RecreationActivityTest {
     fun testCacheAfterRotationWithStartMethod() {
         val testSubscriber = TestSubscriber<Int>()
         RxRetainFactory.start(fragmentManager, rangeWithDelay(0, 10, SECONDS.toMillis(2)).bindToThread(), testSubscriber)
-        testSubscriber.awaitTerminalEvent()
+        testSubscriber.awaitTerminalEvent(10, SECONDS)
 
         changeOrientationAndWait()
 
         val secondSubscription = TestSubscriber<Int>()
         //in this case may use any observable. I want use null, cause now it's ignored
         RxRetainFactory.start(fragmentManager, null, secondSubscription)
-        secondSubscription.awaitTerminalEvent()
+        secondSubscription.awaitTerminalEvent(10, SECONDS)
 
         secondSubscription.assertCompleted()
         secondSubscription.assertReceivedOnNext((0..9).toArrayList())
+    }
+
+    @Test
+    fun AttachInToTwoRunningObservablesAfterRotation() {
+        val firstTag = "first tag"
+        val secondTag = "second tag"
+        var firstSubscriber = TestSubscriber<Int>()
+        RxRetainFactory.start(fragmentManager, rangeWithDelay(0, 5, SECONDS.toMillis(5)).bindToThread(), firstSubscriber, firstTag)
+        firstSubscriber.awaitTerminalEvent(1, SECONDS)
+
+        var secondSubscriber = TestSubscriber<Int>()
+        RxRetainFactory.start(fragmentManager, rangeWithDelay(0, 4, SECONDS.toMillis(8)).bindToThread(), secondSubscriber, secondTag)
+        secondSubscriber.awaitTerminalEvent(2, SECONDS)
+
+        changeOrientationAndWait()
+
+        firstSubscriber.assertUnsubscribed()
+        secondSubscriber.assertUnsubscribed()
+
+        firstSubscriber = TestSubscriber()
+        secondSubscriber = TestSubscriber()
+        RxRetainFactory.start(fragmentManager, null, firstSubscriber, firstTag)
+        RxRetainFactory.start(fragmentManager, null, secondSubscriber, secondTag)
+
+        firstSubscriber.awaitIfNotUnsubscribed()
+        secondSubscriber.awaitIfNotUnsubscribed()
+
+        firstSubscriber.assertCompleted()
+        firstSubscriber.assertReceivedOnNext((0..4).toArrayList())
+
+        secondSubscriber.assertCompleted()
+        secondSubscriber.assertReceivedOnNext((0..3).toArrayList())
+
     }
 
     private fun changeOrientationAndWait() {
