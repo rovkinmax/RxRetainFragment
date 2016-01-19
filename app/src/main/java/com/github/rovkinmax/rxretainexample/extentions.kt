@@ -24,6 +24,8 @@ fun rangeWithDelay(start: Int, count: Int, totalDelay: Long = 5000): Observable<
     }
 }
 
+fun errorObservable(exception: TestException, delay: Long = 5000) = Observable.create<Int> { delayInThread(delay) ;throw exception }
+
 fun delayInThread(stepDelay: Long) {
     try {
         Thread.sleep(stepDelay)

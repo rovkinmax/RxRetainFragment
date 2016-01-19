@@ -130,7 +130,7 @@ class RecreationActivityTest {
     @Test
     fun testCacheErrorAfterRotation() {
         val subscriber = TestSubscriber<Int>()
-        RxRetainFactory.start(fragmentManager, Observable.create<Int> { delayInThread(10000) ;throw TestException("ha") }, subscriber)
+        RxRetainFactory.start(fragmentManager, errorObservable(TestException("ha")).bindToThread(), subscriber)
         subscriber.awaitTerminalEvent(2, SECONDS)
 
         changeOrientationAndWait()
@@ -140,6 +140,34 @@ class RecreationActivityTest {
         subscriber2.assertError(TestException("ha"))
     }
 
+    @Test
+    fun testCachedErrorInToTwoObservablesAfterRotation() {
+        val firstTag = "first tag"
+        val secondTag = "second tag"
+        var firstSubscriber = TestSubscriber<Int>()
+        RxRetainFactory.start(fragmentManager, errorObservable(TestException("first")).bindToThread(), firstSubscriber, firstTag)
+        firstSubscriber.awaitTerminalEvent(1, SECONDS)
+
+        var secondSubscriber = TestSubscriber<Int>()
+        RxRetainFactory.start(fragmentManager, errorObservable(TestException("second")).bindToThread(), secondSubscriber, secondTag)
+        secondSubscriber.awaitTerminalEvent(2, SECONDS)
+
+        changeOrientationAndWait()
+
+        firstSubscriber.assertUnsubscribed()
+        secondSubscriber.assertUnsubscribed()
+
+        firstSubscriber = TestSubscriber()
+        secondSubscriber = TestSubscriber()
+        RxRetainFactory.start(fragmentManager, null, firstSubscriber, firstTag)
+        RxRetainFactory.start(fragmentManager, null, secondSubscriber, secondTag)
+
+        firstSubscriber.awaitIfNotUnsubscribed()
+        secondSubscriber.awaitIfNotUnsubscribed()
+
+        firstSubscriber.assertError(TestException("first"))
+        secondSubscriber.assertError(TestException("second"))
+    }
 
 
     private fun changeOrientationAndWait() {
