@@ -95,7 +95,7 @@ class RecreationActivityTest {
     }
 
     @Test
-    fun AttachInToTwoRunningObservablesAfterRotation() {
+    fun testAttachInToTwoRunningObservablesAfterRotation() {
         val firstTag = "first tag"
         val secondTag = "second tag"
         var firstSubscriber = TestSubscriber<Int>()
@@ -126,6 +126,21 @@ class RecreationActivityTest {
         secondSubscriber.assertReceivedOnNext((0..3).toArrayList())
 
     }
+
+    @Test
+    fun testCacheErrorAfterRotation() {
+        val subscriber = TestSubscriber<Int>()
+        RxRetainFactory.start(fragmentManager, Observable.create<Int> { delayInThread(10000) ;throw TestException("ha") }, subscriber)
+        subscriber.awaitTerminalEvent(2, SECONDS)
+
+        changeOrientationAndWait()
+        val subscriber2 = TestSubscriber<Int>()
+        RxRetainFactory.start(fragmentManager, null, subscriber2)
+        subscriber2.awaitIfNotUnsubscribed()
+        subscriber2.assertError(TestException("ha"))
+    }
+
+
 
     private fun changeOrientationAndWait() {
         device.setOrientationLeft()
