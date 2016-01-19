@@ -9,7 +9,7 @@ import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
 import android.support.test.uiautomator.UiDevice
 import com.github.rovkinmax.rxretain.RxRetainFactory
-import com.github.rovkinmax.rxretainexample.activity.TestableActivity
+import com.github.rovkinmax.rxretainexample.test.*
 import com.robotium.solo.Solo
 import org.junit.After
 import org.junit.Before
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit.SECONDS
  */
 @RunWith(AndroidJUnit4::class)
 @SdkSuppress(minSdkVersion = 18)
-class RecreationActivityTest {
+class RotationActivityTest {
 
     @get:Rule
     val rule = ActivityTestRule<TestableActivity>(TestableActivity::class.java, false, false)
@@ -172,11 +172,39 @@ class RecreationActivityTest {
     @Test
     fun testClearCacheAfterUnsubscribeFragment() {
         val subscriber = TestSubscriber<Int>()
-        val fragment = RxRetainFactory.start(fragmentManager, errorObservable(TestException("ha")).bindToThread(), subscriber)
+        val fragment = RxRetainFactory.start(fragmentManager, rangeWithDelay(0, 5, SECONDS.toMillis(5)).bindToThread(), subscriber)
         subscriber.awaitTerminalEvent(2, SECONDS)
         fragment.unsubscribe()
 
+        subscriber.assertUnsubscribed()
+
         changeOrientationAndWait()
+
+        val subscriber2 = TestSubscriber<Int>()
+        RxRetainFactory.start(fragmentManager, null, subscriber2)
+        subscriber2.awaitTerminalEvent(2, SECONDS)
+        subscriber2.unsubscribe()
+
+        subscriber2.assertNoTerminalEvent()
+    }
+
+    @Test
+    fun testClearErrorCacheAfterUnsubscribeFragment() {
+        val subscriber = TestSubscriber<Int>()
+        val fragment = RxRetainFactory.start(fragmentManager, errorObservable(TestException("cached")).bindToThread(), subscriber)
+        subscriber.awaitTerminalEvent(2, SECONDS)
+        fragment.unsubscribe()
+
+        subscriber.assertUnsubscribed()
+
+        changeOrientationAndWait()
+
+        val subscriber2 = TestSubscriber<Int>()
+        RxRetainFactory.start(fragmentManager, null, subscriber2)
+        subscriber2.awaitTerminalEvent(2, SECONDS)
+        subscriber2.unsubscribe()
+
+        subscriber2.assertNoTerminalEvent()
     }
 
     private fun changeOrientationAndWait() {

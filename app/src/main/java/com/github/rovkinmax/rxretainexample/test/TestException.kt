@@ -1,4 +1,4 @@
-package com.github.rovkinmax.rxretainexample
+package com.github.rovkinmax.rxretainexample.test
 
 /**
  * @author Rovkin Max

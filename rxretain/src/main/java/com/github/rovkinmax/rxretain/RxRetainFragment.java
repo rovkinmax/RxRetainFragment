@@ -138,11 +138,20 @@ public class RxRetainFragment<T> extends Fragment {
     }
 
     /**
+     * Stop execution of Observable and drop it for set new for execution with the same tag.
+     */
+    public void unsubscribeAndDropObservable() {
+        unsubscribe();
+        mManager.setObservable(null);
+    }
+
+    /**
      * Stop execution of Observable.
      */
     public void unsubscribe() {
         mManager.stop();
     }
+
 
     private void createNewManager(Observable<T> observable) {
         mManager = new RxRetainManager<>(observable);

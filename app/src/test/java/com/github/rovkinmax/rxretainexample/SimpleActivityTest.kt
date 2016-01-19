@@ -5,6 +5,10 @@ import android.app.FragmentManager
 import com.github.rovkinmax.rxretain.EmptyObserver
 import com.github.rovkinmax.rxretain.RxRetainFactory
 import com.github.rovkinmax.rxretain.RxRetainFragment
+import com.github.rovkinmax.rxretainexample.test.TestException
+import com.github.rovkinmax.rxretainexample.test.bindToThread
+import com.github.rovkinmax.rxretainexample.test.delayInThread
+import com.github.rovkinmax.rxretainexample.test.rangeWithDelay
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test

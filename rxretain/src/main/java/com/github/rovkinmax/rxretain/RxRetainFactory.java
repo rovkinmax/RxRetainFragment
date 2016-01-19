@@ -53,7 +53,9 @@ public final class RxRetainFactory {
     }
 
     /**
-     * Start Observer with empty subscriber and default tag or subscribe for previous if it already running. Also all subscriber will be unsubscribed.
+     * Start Observer with empty subscriber and default tag or subscribe for previous if it already running.
+     * If you want drop observable for this tag see {@link RxRetainFragment#unsubscribeAndDropObservable()}.
+     * Also all subscriber will be unsubscribed. Also all subscriber will be unsubscribed.
      * If you want subscribe without unsubscribe previous subscriber use {@link RxRetainFactory#create(FragmentManager, Observable, String)}
      * or {@link RxRetainFactory#create(FragmentManager, Observable)} with {@link RxRetainFragment#subscribe()} methods.
      *
@@ -67,7 +69,9 @@ public final class RxRetainFactory {
 
 
     /**
-     * Start Observer with default tag or subscribe for previous if it already running. Also all subscriber will be unsubscribed.
+     * Start Observer with default tag or subscribe for previous if it already running.
+     * If you want drop observable for this tag see {@link RxRetainFragment#unsubscribeAndDropObservable()}.
+     * Also all subscriber will be unsubscribed. Also all subscriber will be unsubscribed.
      * If you want subscribe without unsubscribe previous subscriber use {@link RxRetainFactory#create(FragmentManager, Observable, String)}
      * or {@link RxRetainFactory#create(FragmentManager, Observable)} with {@link RxRetainFragment#subscribe()} methods.
      *
@@ -81,7 +85,9 @@ public final class RxRetainFactory {
     }
 
     /**
-     * Start Observer with tag or subscribe for previous if it already running. Also all subscriber will be unsubscribed.
+     * Start Observer with tag or subscribe for previous if it already running.
+     * If you want drop observable for this tag see {@link RxRetainFragment#unsubscribeAndDropObservable()}.
+     * Also all subscriber will be unsubscribed.
      * If you want subscribe without unsubscribe previous subscriber use {@link RxRetainFactory#create(FragmentManager, Observable, String)}
      * or {@link RxRetainFactory#create(FragmentManager, Observable)} with {@link RxRetainFragment#subscribe()} methods.
      *

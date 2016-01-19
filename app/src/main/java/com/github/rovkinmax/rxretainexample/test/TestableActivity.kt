@@ -1,4 +1,4 @@
-package com.github.rovkinmax.rxretainexample.activity
+package com.github.rovkinmax.rxretainexample.test
 
 import android.app.Activity
 import android.os.Bundle
