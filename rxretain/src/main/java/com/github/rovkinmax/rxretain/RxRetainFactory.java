@@ -52,10 +52,30 @@ public final class RxRetainFactory {
         return fragment;
     }
 
+    /**
+     * Start Observer with empty subscriber and default tag or subscribe for previous if it already running. Also all subscriber will be unsubscribed.
+     * If you want subscribe without unsubscribe previous subscriber use {@link RxRetainFactory#create(FragmentManager, Observable, String)}
+     * or {@link RxRetainFactory#create(FragmentManager, Observable)} with {@link RxRetainFragment#subscribe()} methods.
+     *
+     * @param fragmentManager fragment manager current activity. need for attach fragment for activity
+     * @param observable      observable for execution. Ignoring if this method was called with the same tag.
+     * @return instance of {@link RxRetainFragment}
+     */
     public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable) {
         return start(fragmentManager, observable, new EmptyObserver<T>());
     }
 
+
+    /**
+     * Start Observer with default tag or subscribe for previous if it already running. Also all subscriber will be unsubscribed.
+     * If you want subscribe without unsubscribe previous subscriber use {@link RxRetainFactory#create(FragmentManager, Observable, String)}
+     * or {@link RxRetainFactory#create(FragmentManager, Observable)} with {@link RxRetainFragment#subscribe()} methods.
+     *
+     * @param fragmentManager fragment manager current activity. need for attach fragment for activity
+     * @param observable      observable for execution. Ignoring if this method was called with the same tag.
+     * @param subscriber      the {@link Subscriber} that will handle emissions and notifications from the Observable
+     * @return instance of {@link RxRetainFragment}
+     */
     public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> subscriber) {
         return start(fragmentManager, observable, subscriber, DEFAULT_TAG);
     }

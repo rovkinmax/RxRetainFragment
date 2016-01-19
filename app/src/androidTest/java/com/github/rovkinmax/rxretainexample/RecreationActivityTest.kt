@@ -59,7 +59,7 @@ class RecreationActivityTest {
     }
 
     @Test
-    fun testSubscribeAfterRotation() {
+    fun testAttachInToRunningObservableAfterRotation() {
         val testSubscriber = TestSubscriber<Int>()
         RxRetainFactory.start(fragmentManager, rangeWithDelay(0, 10, SECONDS.toMillis(10)).bindToThread(), testSubscriber)
         testSubscriber.awaitTerminalEvent(2, SECONDS)
@@ -68,13 +68,31 @@ class RecreationActivityTest {
         testSubscriber.assertUnsubscribed()
 
         val secondSubscriber = TestSubscriber<Int>()
-        RxRetainFactory.start(fragmentManager, rangeWithDelay(0, 10, SECONDS.toMillis(15)), secondSubscriber)
+        //in this case may use any observable. I want use null, cause now it's ignored
+        RxRetainFactory.start(fragmentManager, null, secondSubscriber)
 
         if (!secondSubscriber.isUnsubscribed)
             secondSubscriber.awaitTerminalEvent()
 
         secondSubscriber.assertCompleted()
         secondSubscriber.assertReceivedOnNext((0..9).toArrayList())
+    }
+
+    @Test
+    fun testCacheAfterRotationWithStartMethod() {
+        val testSubscriber = TestSubscriber<Int>()
+        RxRetainFactory.start(fragmentManager, rangeWithDelay(0, 10, SECONDS.toMillis(2)).bindToThread(), testSubscriber)
+        testSubscriber.awaitTerminalEvent()
+
+        changeOrientationAndWait()
+
+        val secondSubscription = TestSubscriber<Int>()
+        //in this case may use any observable. I want use null, cause now it's ignored
+        RxRetainFactory.start(fragmentManager, null, secondSubscription)
+        secondSubscription.awaitTerminalEvent()
+
+        secondSubscription.assertCompleted()
+        secondSubscription.assertReceivedOnNext((0..9).toArrayList())
     }
 
     private fun changeOrientationAndWait() {
