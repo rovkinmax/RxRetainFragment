@@ -311,11 +311,17 @@ class SimpleActivityTest {
         subscriber.awaitTerminalEvent(2, SECONDS)
         fragment.unsubscribeAndDropObservable()
 
-        val testSubscriber = TestSubscriber<Int>()
-        RxRetainFactory.start(fragmentManager, rangeWithDelay(0, 7).bindToThread(), testSubscriber)
+        val testSubscriber = TestSubscriber<String>()
+        RxRetainFactory.start(fragmentManager, Observable.create<String> { sub ->
+            sub.onNext("temp1")
+            sub.onNext("temp2")
+            sub.onCompleted()
+            delayInThread(5000)
+        }.bindToThread(), testSubscriber)
+
         testSubscriber.awaitIfNotUnsubscribed()
 
         testSubscriber.assertCompleted()
-        testSubscriber.assertReceivedOnNext((0..6).toArrayList())
+        testSubscriber.assertReceivedOnNext(arrayListOf("temp1", "temp2"))
     }
 }
