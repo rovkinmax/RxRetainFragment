@@ -20,38 +20,38 @@ class RxRetainManager<T> {
 
     private CompositeSubscription mCurrentSubscriptions = new CompositeSubscription();
     private WeakReference<Observable<T>> mRefObservable;
-    private WeakReference<Subscriber<T>> mRefSubcriber;
+    private WeakReference<Subscriber<T>> mRefSubscriber;
 
 
-    public RxRetainManager(Observable<T> observable) {
+    RxRetainManager(Observable<T> observable) {
         setObservable(observable);
     }
 
-    public void setObservable(Observable<T> observable) {
+    void setObservable(Observable<T> observable) {
         mRefObservable = new WeakReference<>(observable);
     }
 
-    public void subscribe(Action1<T> onNext) {
+    void subscribe(Action1<T> onNext) {
         start();
         addCurrentSubscription(mReplaySubject.subscribe(onNext));
     }
 
-    public void subscribe(Action1<T> onNext, Action1<Throwable> onError, Action0 onCompleted) {
+    void subscribe(Action1<T> onNext, Action1<Throwable> onError, Action0 onCompleted) {
         start();
         addCurrentSubscription(mReplaySubject.subscribe(onNext, onError, onCompleted));
     }
 
-    public void subscribe(final Subscriber<T> subscriber) {
+    void subscribe(final Subscriber<T> subscriber) {
         start();
         addCurrentSubscription(mReplaySubject.subscribe(subscriber));
     }
 
-    public void subscribe(final Observer<T> observer) {
+    void subscribe(final Observer<T> observer) {
         start();
         addCurrentSubscription(mReplaySubject.subscribe(observer));
     }
 
-    public void start() {
+    void start() {
         if (mReplaySubject == null) {
             mReplaySubject = ReplaySubject.create();
             if (hasObservable()) {
@@ -63,11 +63,11 @@ class RxRetainManager<T> {
         }
     }
 
-    public void setSubscriber(Subscriber<T> observer) {
-        if (mRefSubcriber != null && mRefSubcriber.get() != observer) {
+    void setSubscriber(Subscriber<T> observer) {
+        if (mRefSubscriber != null && mRefSubscriber.get() != observer) {
             return;
         }
-        mRefSubcriber = new WeakReference<>(observer);
+        mRefSubscriber = new WeakReference<>(observer);
         if (mReplaySubject != null && observer != null) {
             subscribeObserver();
         }
@@ -83,7 +83,7 @@ class RxRetainManager<T> {
         mCurrentSubscriptions.add(subscription);
     }
 
-    public void stop() {
+    void stop() {
         unsubscribeCurrentIfOption();
         unsubscribeIfOption(getReplaySubscription());
         mRefReplaySubscription = null;
@@ -97,22 +97,22 @@ class RxRetainManager<T> {
         return mRefReplaySubscription.get();
     }
 
-    public void unsubscribeCurrentIfOption() {
+    void unsubscribeCurrentIfOption() {
         unsubscribeIfOption(mCurrentSubscriptions);
         mCurrentSubscriptions.clear();
         mCurrentSubscriptions = new CompositeSubscription();
-        if (mRefSubcriber != null) {
-            mRefSubcriber.clear();
+        if (mRefSubscriber != null) {
+            mRefSubscriber.clear();
         }
-        mRefSubcriber = null;
+        mRefSubscriber = null;
     }
 
     boolean hasSubscriber() {
-        return mRefSubcriber != null && getObserver() != null;
+        return mRefSubscriber != null && getObserver() != null;
     }
 
     private Subscriber<T> getObserver() {
-        return mRefSubcriber.get();
+        return mRefSubscriber.get();
     }
 
     boolean hasObservable() {

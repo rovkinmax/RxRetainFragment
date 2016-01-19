@@ -169,6 +169,15 @@ class RecreationActivityTest {
         secondSubscriber.assertError(TestException("second"))
     }
 
+    @Test
+    fun testClearCacheAfterUnsubscribeFragment() {
+        val subscriber = TestSubscriber<Int>()
+        val fragment = RxRetainFactory.start(fragmentManager, errorObservable(TestException("ha")).bindToThread(), subscriber)
+        subscriber.awaitTerminalEvent(2, SECONDS)
+        fragment.unsubscribe()
+
+        changeOrientationAndWait()
+    }
 
     private fun changeOrientationAndWait() {
         device.setOrientationLeft()
