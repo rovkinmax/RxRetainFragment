@@ -1,6 +1,6 @@
 # RxRetainFragment
 
-### Simple example for orientation changes
+##### Simple example for orientation changes
 ``` Java
 public class MainActivity extends Activity {
     private RxRetainFragment<SomeType> rotateExample;
@@ -27,7 +27,7 @@ public class MainActivity extends Activity {
 }
 ```
 
-### More then one instance 
+##### More then one instance 
 ``` Java
 public class MainActivity extends Activity {
     private RxRetainFragment<SomeType> rotateExample;
@@ -65,6 +65,29 @@ public class MainActivity extends Activity {
         
         rotateExample.subscibe()//call to start if not started
         rotateExample2.subscibe()//call to start if not started
+    }
+}
+```
+##### Start or subscribe for running or finished observable with the same tag
+``` Java
+public class MainActivity extends Activity {
+    
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        RxRetainFactory.start(getFragmentManager(), yourAwesomeObservable, new EmptySubscriber<SomeType>() {
+            @Override
+            public void onStart() {
+                //show load progress.
+                //It will be called after rotation
+            }
+
+            @Override
+            public void onNext(SomeType result) {
+                //do something
+            }
+        });
     }
 }
 ```
