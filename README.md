@@ -1,7 +1,7 @@
 # RxRetainFragment
 
 ### Simple example for orientation changes
-```
+``` Java
 public class MainActivity extends Activity {
     private RxRetainFragment<SomeType> rotateExample;
 
