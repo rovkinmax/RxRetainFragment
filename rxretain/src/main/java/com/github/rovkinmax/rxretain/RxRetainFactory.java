@@ -25,7 +25,7 @@ public final class RxRetainFactory {
      * @return instance of {@link RxRetainFragment}
      */
     public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable) {
-        return create(fragmentManager, observable, new EmptyObserver<T>());
+        return create(fragmentManager, observable, new EmptySubscriber<T>());
     }
 
     /**
@@ -38,7 +38,7 @@ public final class RxRetainFactory {
      * @return instance of {@link RxRetainFragment}
      */
     public static <T> RxRetainFragment<T> create(FragmentManager fragmentManager, Observable<T> observable, String tag) {
-        return create(fragmentManager, observable, new EmptyObserver<T>(), tag);
+        return create(fragmentManager, observable, new EmptySubscriber<T>(), tag);
     }
 
 
@@ -86,7 +86,7 @@ public final class RxRetainFactory {
      * @return instance of {@link RxRetainFragment}
      */
     public static <T> RxRetainFragment<T> restart(FragmentManager fragmentManager, Observable<T> observable) {
-        return restart(fragmentManager, observable, new EmptyObserver<T>());
+        return restart(fragmentManager, observable, new EmptySubscriber<T>());
     }
 
 
@@ -140,7 +140,7 @@ public final class RxRetainFactory {
      * @return instance of {@link RxRetainFragment}
      */
     public static <T> RxRetainFragment<T> start(FragmentManager fragmentManager, Observable<T> observable) {
-        return start(fragmentManager, observable, new EmptyObserver<T>());
+        return start(fragmentManager, observable, new EmptySubscriber<T>());
     }
 
 

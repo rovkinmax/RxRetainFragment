@@ -2,7 +2,7 @@ package com.github.rovkinmax.rxretainexample
 
 import android.app.Activity
 import android.app.FragmentManager
-import com.github.rovkinmax.rxretain.EmptyObserver
+import com.github.rovkinmax.rxretain.EmptySubscriber
 import com.github.rovkinmax.rxretain.RxRetainFactory
 import com.github.rovkinmax.rxretain.RxRetainFragment
 import com.github.rovkinmax.rxretainexample.test.*
@@ -155,11 +155,11 @@ class SimpleActivityTest {
         testSubscriber.assertError(TestException("Expected exception"))
     }
 
-    private fun createFragmentWithTimer(tag: String, subscriber: Subscriber<Int> = EmptyObserver<Int>()): RxRetainFragment<Int> {
+    private fun createFragmentWithTimer(tag: String, subscriber: Subscriber<Int> = EmptySubscriber<Int>()): RxRetainFragment<Int> {
         return RxRetainFactory.create(fragmentManager, Observable.range(0, 10), subscriber, tag)
     }
 
-    private fun createFragmentWithOnErrorAction(tag: String, subscriber: Subscriber<Int> = EmptyObserver<Int>(), exception: Throwable): RxRetainFragment<Int> {
+    private fun createFragmentWithOnErrorAction(tag: String, subscriber: Subscriber<Int> = EmptySubscriber<Int>(), exception: Throwable): RxRetainFragment<Int> {
         return RxRetainFactory.create(fragmentManager, Observable.create { throw exception }, subscriber, tag)
     }
 

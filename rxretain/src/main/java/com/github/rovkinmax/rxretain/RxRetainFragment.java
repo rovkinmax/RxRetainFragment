@@ -48,7 +48,7 @@ public class RxRetainFragment<T> extends Fragment {
      * @see <a href="http://reactivex.io/documentation/operators/subscribe.html">ReactiveX operators documentation: Subscribe</a>
      */
     public RxRetainFragment<T> subscribe() {
-        mManager.subscribe(new EmptyObserver<T>());
+        mManager.subscribe(new EmptySubscriber<T>());
         return this;
     }
 

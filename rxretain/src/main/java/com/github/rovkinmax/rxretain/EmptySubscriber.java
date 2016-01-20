@@ -5,7 +5,7 @@ import rx.Subscriber;
 /**
  * @author Rovkin Max
  */
-public class EmptyObserver<T> extends Subscriber<T> {
+public class EmptySubscriber<T> extends Subscriber<T> {
     @Override
     public void onCompleted() {
 
