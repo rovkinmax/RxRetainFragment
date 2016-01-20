@@ -1,4 +1,4 @@
-# RxRetainFragment
+#RxRetainFragment [![Apache License](https://img.shields.io/badge/license-Apache%20v2-blue.svg)](https://github.com/rovkinmax/RxRetainFragment/blob/master/LICENSE)
 
 ##### Simple example for orientation changes
 ``` Java
