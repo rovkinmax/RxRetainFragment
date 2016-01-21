@@ -1,5 +1,9 @@
 #RxRetainFragment [![Apache License](https://img.shields.io/badge/license-Apache%20v2-blue.svg)](https://github.com/rovkinmax/RxRetainFragment/blob/master/LICENSE)
 
+install from `jcenter()`
+``` gradle
+compile 'com.github.rovkinmax:rxretain:1.0.3'
+```
 ##### Simple example for orientation changes
 ``` Java
 public class MainActivity extends Activity {
