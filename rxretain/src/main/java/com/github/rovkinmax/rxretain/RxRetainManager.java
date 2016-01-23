@@ -57,7 +57,7 @@ class RxRetainManager<T> {
             if (hasObservable()) {
                 mRefReplaySubscription = new WeakReference<>(getObservable().subscribe(mReplaySubject));
             } else {
-                throw new RuntimeException("Can't run. First you must create RxRetainFragment with not null observer");
+                throw new RuntimeException("Can't run. First you must create RetainWrapper with not null observer");
             }
             subscribeObserver();
         }

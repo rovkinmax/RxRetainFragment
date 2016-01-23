@@ -3,8 +3,8 @@ package com.github.rovkinmax.rxretainexample
 import android.app.Activity
 import android.app.FragmentManager
 import com.github.rovkinmax.rxretain.EmptySubscriber
-import com.github.rovkinmax.rxretain.RxRetainFactory
-import com.github.rovkinmax.rxretain.RxRetainFragment
+import com.github.rovkinmax.rxretain.RetainFactory
+import com.github.rovkinmax.rxretain.RetainWrapper
 import com.github.rovkinmax.rxretainexample.test.*
 import org.junit.Assert
 import org.junit.Before
@@ -43,7 +43,7 @@ class SimpleActivityTest {
     @Test
     fun testSimpleRun() {
         val testSubscriber = TestSubscriber<Int>()
-        RxRetainFactory.start(fragmentManager, Observable.range(0, 10), testSubscriber)
+        RetainFactory.start(fragmentManager, Observable.range(0, 10), testSubscriber)
 
         testSubscriber.assertCompleted()
         testSubscriber.assertNoErrors()
@@ -56,7 +56,7 @@ class SimpleActivityTest {
     fun testThreadSimpleRun() {
         val observableThread = Observable.range(0, 10).bindToThread()
         val testSubscriber = TestSubscriber<Int>()
-        RxRetainFactory.start(fragmentManager, observableThread, testSubscriber)
+        RetainFactory.start(fragmentManager, observableThread, testSubscriber)
 
         testSubscriber.awaitTerminalEvent()
         testSubscriber.assertCompleted()
@@ -155,23 +155,23 @@ class SimpleActivityTest {
         testSubscriber.assertError(TestException("Expected exception"))
     }
 
-    private fun createFragmentWithTimer(tag: String, subscriber: Subscriber<Int> = EmptySubscriber<Int>()): RxRetainFragment<Int> {
-        return RxRetainFactory.create(fragmentManager, Observable.range(0, 10), subscriber, tag)
+    private fun createFragmentWithTimer(tag: String, subscriber: Subscriber<Int> = EmptySubscriber<Int>()): RetainWrapper<Int> {
+        return RetainFactory.create(fragmentManager, Observable.range(0, 10), subscriber, tag)
     }
 
-    private fun createFragmentWithOnErrorAction(tag: String, subscriber: Subscriber<Int> = EmptySubscriber<Int>(), exception: Throwable): RxRetainFragment<Int> {
-        return RxRetainFactory.create(fragmentManager, Observable.create { throw exception }, subscriber, tag)
+    private fun createFragmentWithOnErrorAction(tag: String, subscriber: Subscriber<Int> = EmptySubscriber<Int>(), exception: Throwable): RetainWrapper<Int> {
+        return RetainFactory.create(fragmentManager, Observable.create { throw exception }, subscriber, tag)
     }
 
     @Test
     fun testStartObservable() {
 
         var testSubscriber = TestSubscriber<Long>()
-        RxRetainFactory.start(fragmentManager, Observable.timer(5, SECONDS).bindToThread(), testSubscriber)
+        RetainFactory.start(fragmentManager, Observable.timer(5, SECONDS).bindToThread(), testSubscriber)
         testSubscriber.awaitTerminalEvent(2, SECONDS)
 
         val spySubscribers = Mockito.spy(TestSubscriber<Long>())
-        RxRetainFactory.start(fragmentManager, Observable.range(0, 10).map { it.toLong() }.bindToThread(), spySubscribers)
+        RetainFactory.start(fragmentManager, Observable.range(0, 10).map { it.toLong() }.bindToThread(), spySubscribers)
         testSubscriber.assertUnsubscribed()
 
         if (!spySubscribers.isUnsubscribed)
@@ -186,11 +186,11 @@ class SimpleActivityTest {
     @Test
     fun testRestartObservable() {
         val testSubscriber = TestSubscriber<Long>()
-        RxRetainFactory.start(fragmentManager, Observable.timer(5, SECONDS).bindToThread(), testSubscriber)
+        RetainFactory.start(fragmentManager, Observable.timer(5, SECONDS).bindToThread(), testSubscriber)
         testSubscriber.awaitTerminalEvent(2, SECONDS)
 
         val spySubscribers = Mockito.spy(TestSubscriber<Long>())
-        RxRetainFactory.restart(fragmentManager, Observable.range(0, 10).map { it.toLong() }.bindToThread(), spySubscribers)
+        RetainFactory.restart(fragmentManager, Observable.range(0, 10).map { it.toLong() }.bindToThread(), spySubscribers)
         testSubscriber.assertUnsubscribed()
         Mockito.verify(spySubscribers).onStart()
         spySubscribers.awaitTerminalEvent()
@@ -203,11 +203,11 @@ class SimpleActivityTest {
     @Test
     fun testStartWithTwoDifferentTags() {
         val firstSubscriber = TestSubscriber<Long>()
-        RxRetainFactory.start(fragmentManager, Observable.timer(5, SECONDS).bindToThread(), firstSubscriber, "first tag")
+        RetainFactory.start(fragmentManager, Observable.timer(5, SECONDS).bindToThread(), firstSubscriber, "first tag")
         firstSubscriber.awaitTerminalEvent(2, SECONDS)
 
         val secondSubscriber = TestSubscriber<Long>()
-        RxRetainFactory.start(fragmentManager, Observable.timer(5, SECONDS).bindToThread(), secondSubscriber, "second tag")
+        RetainFactory.start(fragmentManager, Observable.timer(5, SECONDS).bindToThread(), secondSubscriber, "second tag")
         secondSubscriber.awaitTerminalEvent()
         if (!firstSubscriber.isUnsubscribed) {
             firstSubscriber.awaitTerminalEvent()
@@ -220,7 +220,7 @@ class SimpleActivityTest {
     @Test
     fun testFragmentUnsubscribeMethod() {
         val testSubscriber = TestSubscriber<Long>()
-        val fragment = RxRetainFactory.start(fragmentManager, Observable.timer(50, SECONDS).bindToThread(), testSubscriber)
+        val fragment = RetainFactory.start(fragmentManager, Observable.timer(50, SECONDS).bindToThread(), testSubscriber)
 
         testSubscriber.awaitTerminalEvent(2, SECONDS)
         fragment.unsubscribe()
@@ -232,7 +232,7 @@ class SimpleActivityTest {
     @Test
     fun testClearCacheAfterFragmentUnsubscribe() {
         val testSubscriber = TestSubscriber<Int>()
-        val fragment = RxRetainFactory.start(fragmentManager, rangeWithDelay(0, 10).bindToThread(), testSubscriber)
+        val fragment = RetainFactory.start(fragmentManager, rangeWithDelay(0, 10).bindToThread(), testSubscriber)
 
         testSubscriber.awaitTerminalEvent(2, SECONDS)
         fragment.unsubscribe()
@@ -252,7 +252,7 @@ class SimpleActivityTest {
     @Test
     fun testCacheResultAfterUnsubscribeSubscription() {
         val testSubscriber = TestSubscriber<Int>()
-        val fragment = RxRetainFactory.start(fragmentManager, rangeWithDelay(0, 5).bindToThread(), testSubscriber)
+        val fragment = RetainFactory.start(fragmentManager, rangeWithDelay(0, 5).bindToThread(), testSubscriber)
 
         testSubscriber.awaitTerminalEvent(2, SECONDS)
         testSubscriber.unsubscribe()
@@ -271,7 +271,7 @@ class SimpleActivityTest {
     @Test
     fun testCacheErrorAfterUnsubscribeSubscription() {
         val testSubscriber = TestSubscriber<Int>()
-        val fragment = RxRetainFactory.start(fragmentManager,
+        val fragment = RetainFactory.start(fragmentManager,
                 Observable.create<Int> { delayInThread(5000) ;throw TestException("ha") }.bindToThread(), testSubscriber)
 
         testSubscriber.awaitTerminalEvent(2, SECONDS)
@@ -290,7 +290,7 @@ class SimpleActivityTest {
     @Test
     fun testDropObservable() {
         val subscriber = TestSubscriber<Long>()
-        val fragment = RxRetainFactory.start(fragmentManager, Observable.timer(10, SECONDS).bindToThread(), subscriber)
+        val fragment = RetainFactory.start(fragmentManager, Observable.timer(10, SECONDS).bindToThread(), subscriber)
         subscriber.awaitTerminalEvent(2, SECONDS)
         fragment.unsubscribeAndDropObservable()
         var error: Exception? = null
@@ -301,18 +301,18 @@ class SimpleActivityTest {
         }
         Assert.assertNotNull(error)
         Assert.assertTrue(error is RuntimeException)
-        Assert.assertEquals("Can't run. First you must create RxRetainFragment with not null observer", error?.message)
+        Assert.assertEquals("Can't run. First you must create RetainWrapper with not null observer", error?.message)
     }
 
     @Test
     fun testReplaceObservableByNew() {
         val subscriber = TestSubscriber<Long>()
-        val fragment = RxRetainFactory.start(fragmentManager, Observable.timer(10, SECONDS).bindToThread(), subscriber)
+        val fragment = RetainFactory.start(fragmentManager, Observable.timer(10, SECONDS).bindToThread(), subscriber)
         subscriber.awaitTerminalEvent(2, SECONDS)
         fragment.unsubscribeAndDropObservable()
 
         val testSubscriber = TestSubscriber<String>()
-        RxRetainFactory.start(fragmentManager, Observable.create<String> { sub ->
+        RetainFactory.start(fragmentManager, Observable.create<String> { sub ->
             sub.onNext("temp1")
             sub.onNext("temp2")
             sub.onCompleted()

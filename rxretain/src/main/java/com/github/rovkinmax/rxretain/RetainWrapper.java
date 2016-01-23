@@ -16,16 +16,16 @@ import rx.functions.Action1;
 /**
  * @author Rovkin Max
  */
-public class RxRetainFragment<T> extends Fragment {
+public class RetainWrapper<T> extends Fragment {
 
     private RxRetainManager<T> mManager;
     private final RxLifecycleCallback<T> mRxLifecycleCallback = new RxLifecycleCallback<>();
 
-    public RxRetainFragment() {
+    public RetainWrapper() {
     }
 
     @SuppressLint("ValidFragment")
-    RxRetainFragment(Observable<T> observable) {
+    RetainWrapper(Observable<T> observable) {
         createNewManager(observable);
     }
 
@@ -47,7 +47,7 @@ public class RxRetainFragment<T> extends Fragment {
      *
      * @see <a href="http://reactivex.io/documentation/operators/subscribe.html">ReactiveX operators documentation: Subscribe</a>
      */
-    public RxRetainFragment<T> subscribe() {
+    public RetainWrapper<T> subscribe() {
         mManager.subscribe(new EmptySubscriber<T>());
         return this;
     }
@@ -61,7 +61,7 @@ public class RxRetainFragment<T> extends Fragment {
      * @throws OnErrorNotImplementedException if the Observable calls {@code onError}
      * @see <a href="http://reactivex.io/documentation/operators/subscribe.html">ReactiveX operators documentation: Subscribe</a>
      */
-    public RxRetainFragment<T> subscribe(Action1<T> onNext) {
+    public RetainWrapper<T> subscribe(Action1<T> onNext) {
         mManager.subscribe(onNext);
         return this;
     }
@@ -80,7 +80,7 @@ public class RxRetainFragment<T> extends Fragment {
      *                                  if {@code onComplete} is null
      * @see <a href="http://reactivex.io/documentation/operators/subscribe.html">ReactiveX operators documentation: Subscribe</a>
      */
-    public RxRetainFragment<T> subscribe(Action1<T> onNext, Action1<Throwable> onError, Action0 onCompleted) {
+    public RetainWrapper<T> subscribe(Action1<T> onNext, Action1<Throwable> onError, Action0 onCompleted) {
         mManager.subscribe(onNext, onError, onCompleted);
         return this;
     }
@@ -112,7 +112,7 @@ public class RxRetainFragment<T> extends Fragment {
      * @throws RuntimeException               if the {@link Subscriber}'s {@code onError} method itself threw a {@code Throwable}
      * @see <a href="http://reactivex.io/documentation/operators/subscribe.html">ReactiveX operators documentation: Subscribe</a>
      */
-    public RxRetainFragment<T> subscribe(Subscriber<T> subscriber) {
+    public RetainWrapper<T> subscribe(Subscriber<T> subscriber) {
         mManager.subscribe(subscriber);
         return this;
     }
@@ -128,7 +128,7 @@ public class RxRetainFragment<T> extends Fragment {
      * @param observer the Observer that will handle emissions and notifications from the Observable
      * @see <a href="http://reactivex.io/documentation/operators/subscribe.html">ReactiveX operators documentation: Subscribe</a>
      */
-    public RxRetainFragment<T> subscribe(final Observer<T> observer) {
+    public RetainWrapper<T> subscribe(final Observer<T> observer) {
         mManager.subscribe(observer);
         return this;
     }
