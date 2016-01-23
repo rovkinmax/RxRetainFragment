@@ -2,18 +2,18 @@
 
 install from `jcenter()`
 ``` gradle
-compile 'com.github.rovkinmax:rxretain:1.0.3'
+compile 'com.github.rovkinmax:rxretain:1.0.4'
 ```
 ##### Simple example for orientation changes
 ``` Java
 public class MainActivity extends Activity {
-    private RxRetainFragment<SomeType> rotateExample;
+    private RetainWrapper<SomeType> rotateExample;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        rotateExample = RxRetainFactory.create(getFragmentManager(), yourAwesomeObservable, new EmptySubscriber<SomeType>() {
+        rotateExample = RetainFactory.create(getFragmentManager(), yourAwesomeObservable, new EmptySubscriber<SomeType>() {
             @Override
             public void onStart() {
                 //show load progress.
@@ -34,14 +34,14 @@ public class MainActivity extends Activity {
 ##### More then one instance 
 ``` Java
 public class MainActivity extends Activity {
-    private RxRetainFragment<SomeType> rotateExample;
-    private RxRetainFragment<SomeType2> rotateExample2;
+    private RetainWrapper<SomeType> rotateExample;
+    private RetainWrapper<SomeType2> rotateExample2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        rotateExample = RxRetainFactory.create(getFragmentManager(), yourAwesomeObservable, new EmptySubscriber<SomeType>() {
+        rotateExample = RetainFactory.create(getFragmentManager(), yourAwesomeObservable, new EmptySubscriber<SomeType>() {
             @Override
             public void onStart() {
                 //show load progress.
@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
             }
         },"MY_FIRST_TAG");
         
-        rotateExample2 = RxRetainFactory.create(getFragmentManager(), yourAwesomeObservable2, new EmptySubscriber<SomeType2>() {
+        rotateExample2 = RetainFactory.create(getFragmentManager(), yourAwesomeObservable2, new EmptySubscriber<SomeType2>() {
             @Override
             public void onStart() {
                 //show load progress.
@@ -80,7 +80,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        RxRetainFactory.start(getFragmentManager(), yourAwesomeObservable, new EmptySubscriber<SomeType>() {
+        RetainFactory.start(getFragmentManager(), yourAwesomeObservable, new EmptySubscriber<SomeType>() {
             @Override
             public void onStart() {
                 //show load progress.
