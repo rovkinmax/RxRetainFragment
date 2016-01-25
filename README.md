@@ -96,12 +96,12 @@ public class MainActivity extends Activity {
 }
 ```
 
-#### Clear result for current RetainWrapper
+##### Clear result for current RetainWrapper
 ```Java
 curentRetainWrapper.unsubscribe()
 ```
 
-#### Drop observable for current RetainWrapper
+##### Drop observable for current RetainWrapper
 ```Java
 curentRetainWrapper.unsubscribeAndDropObservable()
 ```
