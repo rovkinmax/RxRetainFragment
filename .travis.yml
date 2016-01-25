@@ -24,7 +24,6 @@ cache:
 
 
 before_script:
-  - ./gradlew clean checkstyle
   - echo no | android create avd --force -t ${ANDROID_TARGET} -n ${ANDROID_AVD_NAME} --abi ${ANDROID_ABI}
   - emulator -avd ${ANDROID_AVD_NAME} -no-skin -no-audio -no-window &
   - android-wait-for-emulator
