@@ -30,4 +30,4 @@ before_script:
   - adb shell input keyevent 82 &
 
 script:
-  - ./gradlew connectedFatDebugAndroidTest testDebugUnitTest -Dtest.single=SimpleActivityTest
+  - ./gradlew connectedDebugAndroidTest testDebugUnitTest -Dtest.single=SimpleActivityTest
