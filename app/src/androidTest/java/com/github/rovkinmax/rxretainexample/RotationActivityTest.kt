@@ -74,7 +74,7 @@ class RotationActivityTest {
         secondSubscriber.awaitIfNotUnsubscribed()
 
         secondSubscriber.assertCompleted()
-        secondSubscriber.assertReceivedOnNext((0..9).toArrayList())
+        secondSubscriber.assertReceivedOnNext((0..9).toCollection(arrayListOf<Int>()))
     }
 
     @Test
@@ -91,7 +91,7 @@ class RotationActivityTest {
         secondSubscription.awaitTerminalEvent(10, SECONDS)
 
         secondSubscription.assertCompleted()
-        secondSubscription.assertReceivedOnNext((0..9).toArrayList())
+        secondSubscription.assertReceivedOnNext((0..9).toCollection(arrayListOf<Int>()))
     }
 
     @Test
@@ -120,10 +120,10 @@ class RotationActivityTest {
         secondSubscriber.awaitIfNotUnsubscribed()
 
         firstSubscriber.assertCompleted()
-        firstSubscriber.assertReceivedOnNext((0..4).toArrayList())
+        firstSubscriber.assertReceivedOnNext((0..4).toCollection(arrayListOf<Int>()))
 
         secondSubscriber.assertCompleted()
-        secondSubscriber.assertReceivedOnNext((0..3).toArrayList())
+        secondSubscriber.assertReceivedOnNext((0..3).toCollection(arrayListOf<Int>()))
 
     }
 

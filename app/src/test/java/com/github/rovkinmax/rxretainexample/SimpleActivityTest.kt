@@ -48,7 +48,7 @@ class SimpleActivityTest {
         testSubscriber.assertCompleted()
         testSubscriber.assertNoErrors()
         testSubscriber.assertValueCount(10)
-        testSubscriber.assertReceivedOnNext((0..9).toArrayList())
+        testSubscriber.assertReceivedOnNext((0..9).toCollection(arrayListOf<Int>()))
 
     }
 
@@ -61,30 +61,27 @@ class SimpleActivityTest {
         testSubscriber.awaitTerminalEvent()
         testSubscriber.assertCompleted()
         testSubscriber.assertValueCount(10)
-        testSubscriber.assertReceivedOnNext((0..9).toArrayList())
+        testSubscriber.assertReceivedOnNext((0..9).toCollection(arrayListOf<Int>()))
     }
 
 
-    @Test
-    public fun testRunByEmptySubscribe() {
+    @Test fun testRunByEmptySubscribe() {
         val firstSubscriber = TestSubscriber<Int>()
         createFragmentWithTimer("first", firstSubscriber).subscribe()
         firstSubscriber.assertCompleted()
-        firstSubscriber.assertReceivedOnNext((0..9).toArrayList())
+        firstSubscriber.assertReceivedOnNext((0..9).toCollection(arrayListOf<Int>()))
     }
 
-    @Test
-    public fun testErrorWithEmptySubscribeMethod() {
+    @Test fun testErrorWithEmptySubscribeMethod() {
         val firstSubscriber = TestSubscriber<Int>()
         createFragmentWithOnErrorAction("second", firstSubscriber, TestException("Expected exception")).subscribe()
         firstSubscriber.assertError(TestException("Expected exception"))
     }
 
-    @Test
-    public fun testRunBySubscribeWithOnNextAction() {
+    @Test fun testRunBySubscribeWithOnNextAction() {
         val list = ArrayList<Int>()
         createFragmentWithTimer("first").subscribe({ list.add(it) })
-        Assert.assertEquals((0..9).toArrayList(), list)
+        Assert.assertEquals((0..9).toCollection(arrayListOf<Int>()), list)
     }
 
     @Test
@@ -99,8 +96,7 @@ class SimpleActivityTest {
         Assert.assertNotNull(error)
     }
 
-    @Test
-    public fun testRunBySubscribeWithThreeCallbacks() {
+    @Test fun testRunBySubscribeWithThreeCallbacks() {
         var isCompleted = false
         createFragmentWithTimer("second").subscribe({}, {}, { isCompleted = true })
         Assert.assertTrue(isCompleted)
@@ -120,12 +116,11 @@ class SimpleActivityTest {
         Assert.assertEquals(TestException("Expected exception"), exception)
     }
 
-    @Test
-    public fun testRunBySubscribeWithObserver() {
+    @Test fun testRunBySubscribeWithObserver() {
         val testObserver = TestObserver<Int>()
         createFragmentWithTimer("first").subscribe(testObserver)
         testObserver.assertTerminalEvent()
-        testObserver.assertReceivedOnNext((0..9).toArrayList())
+        testObserver.assertReceivedOnNext((0..9).toCollection(arrayListOf<Int>()))
     }
 
     @Test
@@ -137,12 +132,11 @@ class SimpleActivityTest {
         Assert.assertEquals(arrayListOf(TestException("Expected exception")), testObserver.onErrorEvents)
     }
 
-    @Test
-    public fun testRunBySubscribeWithSubscriber() {
+    @Test fun testRunBySubscribeWithSubscriber() {
         val testSubscriber = TestSubscriber<Int>()
         createFragmentWithTimer("first").subscribe(testSubscriber)
         testSubscriber.assertCompleted()
-        testSubscriber.assertReceivedOnNext((0..9).toArrayList())
+        testSubscriber.assertReceivedOnNext((0..9).toCollection(arrayListOf<Int>()))
     }
 
 
@@ -197,7 +191,7 @@ class SimpleActivityTest {
 
         spySubscribers.assertCompleted()
         spySubscribers.assertValueCount(10)
-        spySubscribers.assertReceivedOnNext(((0L)..(9L)).toArrayList())
+        spySubscribers.assertReceivedOnNext(((0L)..(9L)).toCollection(arrayListOf<Long>()))
     }
 
     @Test
@@ -245,7 +239,7 @@ class SimpleActivityTest {
         secondSubscriber.awaitTerminalEvent()
 
         secondSubscriber.assertCompleted()
-        secondSubscriber.assertReceivedOnNext((0..9).toArrayList())
+        secondSubscriber.assertReceivedOnNext((0..9).toCollection(arrayListOf<Int>()))
     }
 
 
@@ -265,7 +259,7 @@ class SimpleActivityTest {
 
         testSubscriber.assertNoTerminalEvent()
         secondSubscriber.assertTerminalEvent()
-        secondSubscriber.assertReceivedOnNext((0..4).toArrayList())
+        secondSubscriber.assertReceivedOnNext((0..4).toCollection(arrayListOf<Int>()))
     }
 
     @Test
