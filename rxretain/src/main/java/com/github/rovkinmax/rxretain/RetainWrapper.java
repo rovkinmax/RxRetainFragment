@@ -39,6 +39,7 @@ public class RetainWrapper<T> extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        unsubscribeAndDropObservable();
         getActivity().getApplication().unregisterActivityLifecycleCallbacks(mRxLifecycleCallback);
     }
 

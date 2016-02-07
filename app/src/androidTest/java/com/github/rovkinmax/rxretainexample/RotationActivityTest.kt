@@ -11,13 +11,12 @@ import android.support.test.uiautomator.UiDevice
 import com.github.rovkinmax.rxretain.RetainFactory
 import com.github.rovkinmax.rxretainexample.test.*
 import com.robotium.solo.Solo
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
 import org.junit.runner.RunWith
 import rx.Observable
 import rx.observers.TestSubscriber
+import rx.schedulers.TestScheduler
+import rx.subjects.TestSubject
 import java.util.concurrent.TimeUnit.SECONDS
 
 /**
@@ -205,6 +204,20 @@ class RotationActivityTest {
         subscriber2.unsubscribe()
 
         subscriber2.assertNoTerminalEvent()
+    }
+
+
+    @Test
+    fun testUnsubscribeAfterFinished() {
+        val testSubscriber = TestSubscriber<Long>()
+        val scheduler = TestScheduler()
+        val testObservable = TestSubject.create<Long>(scheduler)
+        val wrapper = RetainFactory.start(fragmentManager, testObservable, testSubscriber)
+        testSubscriber.awaitTerminalEvent(2, SECONDS)
+
+        solo.finishOpenedActivities()
+        testSubscriber.assertUnsubscribed()
+        Assert.assertFalse(testObservable.hasObservers())
     }
 
     private fun changeOrientationAndWait() {

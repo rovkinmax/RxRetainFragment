@@ -1,5 +1,6 @@
 package com.github.rovkinmax.rxretainexample;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +32,10 @@ public class MainActivity extends AppCompatActivity {
                 printInt(integer);
             }
         }, "ROTATION_PRINTER");
+    }
+
+    public void openSecondActivity(View v) {
+        startActivity(new Intent(this, SecondActivity.class));
     }
 
     public void simpleRun(View v) {

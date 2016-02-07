@@ -20,6 +20,12 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="Open second activity"
+        android:onClick="openSecondActivity"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:onClick="simpleRun"
         android:text="Simple run"/>
 
