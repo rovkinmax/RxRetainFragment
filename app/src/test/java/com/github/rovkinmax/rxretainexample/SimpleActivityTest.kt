@@ -14,7 +14,6 @@ import org.mockito.Mockito
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricGradleTestRunner
 import org.robolectric.annotation.Config
-import org.robolectric.util.ActivityController
 import rx.Observable
 import rx.Subscriber
 import rx.exceptions.OnErrorNotImplementedException
@@ -30,13 +29,11 @@ import java.util.concurrent.TimeUnit.SECONDS
 @RunWith(RobolectricGradleTestRunner::class)
 class SimpleActivityTest {
 
-    private lateinit var activity: Activity
-    private lateinit var controller: ActivityController<Activity>
     private lateinit var fragmentManager: FragmentManager
     @Before
     fun setUp() {
-        controller = Robolectric.buildActivity(Activity::class.java).create().start().visible()
-        activity = controller.get()
+        val controller = Robolectric.buildActivity(Activity::class.java).create().start().visible()
+        val activity = controller.get()
         fragmentManager = activity.fragmentManager
     }
 
@@ -317,5 +314,38 @@ class SimpleActivityTest {
 
         testSubscriber.assertCompleted()
         testSubscriber.assertReceivedOnNext(arrayListOf("temp1", "temp2"))
+    }
+
+
+    @Test
+    fun testCompose() {
+        val subscriber = TestSubscriber<Int>()
+        val observable = rangeWithDelay(0, 10, 4000)
+        observable.bindToThread()
+                .compose(RetainFactory.bindToRetain(fragmentManager))
+                .subscribe(subscriber)
+
+        subscriber.awaitTerminalEvent()
+
+        subscriber.assertCompleted()
+        subscriber.assertReceivedOnNext((0..9).toCollection(arrayListOf()))
+    }
+
+    @Test
+    fun testUnsubscribeWithCompose() {
+        val subscriber = TestSubscriber<Int>()
+        val observable = rangeWithDelay(0, 10, 4000)
+        val subscription = observable.bindToThread()
+                .compose(RetainFactory.bindToRetain(fragmentManager))
+                .subscribe(subscriber)
+
+        subscriber.awaitTerminalEvent(2, SECONDS)
+        subscription.unsubscribe()
+
+        subscriber.assertUnsubscribed()
+
+        subscriber.awaitTerminalEvent(4, SECONDS)
+
+        subscriber.assertNoTerminalEvent()
     }
 }

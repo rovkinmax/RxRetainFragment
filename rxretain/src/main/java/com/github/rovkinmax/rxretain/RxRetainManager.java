@@ -20,7 +20,7 @@ class RxRetainManager<T> {
 
     private CompositeSubscription mCurrentSubscriptions = new CompositeSubscription();
     private WeakReference<Observable<T>> mRefObservable;
-    private WeakReference<Subscriber<T>> mRefSubscriber;
+    private WeakReference<? extends Subscriber<? super T>> mRefSubscriber;
 
 
     RxRetainManager(Observable<T> observable) {
@@ -41,7 +41,7 @@ class RxRetainManager<T> {
         addCurrentSubscription(mReplaySubject.subscribe(onNext, onError, onCompleted));
     }
 
-    void subscribe(final Subscriber<T> subscriber) {
+    void subscribe(final Subscriber<? super T> subscriber) {
         start();
         addCurrentSubscription(mReplaySubject.subscribe(subscriber));
     }
@@ -63,7 +63,7 @@ class RxRetainManager<T> {
         }
     }
 
-    void setSubscriber(Subscriber<T> observer) {
+    void setSubscriber(Subscriber<? super T> observer) {
         if (mRefSubscriber != null && mRefSubscriber.get() != observer) {
             return;
         }
@@ -111,7 +111,7 @@ class RxRetainManager<T> {
         return mRefSubscriber != null && getObserver() != null;
     }
 
-    private Subscriber<T> getObserver() {
+    private Subscriber<? super T> getObserver() {
         return mRefSubscriber.get();
     }
 

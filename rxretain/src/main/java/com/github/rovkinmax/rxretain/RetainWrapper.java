@@ -49,7 +49,7 @@ public class RetainWrapper<T> extends Fragment {
      * @see <a href="http://reactivex.io/documentation/operators/subscribe.html">ReactiveX operators documentation: Subscribe</a>
      */
     public RetainWrapper<T> subscribe() {
-        mManager.subscribe(new EmptySubscriber<T>());
+        mManager.subscribe((Observer<T>) new EmptySubscriber<T>());
         return this;
     }
 
@@ -113,7 +113,7 @@ public class RetainWrapper<T> extends Fragment {
      * @throws RuntimeException               if the {@link Subscriber}'s {@code onError} method itself threw a {@code Throwable}
      * @see <a href="http://reactivex.io/documentation/operators/subscribe.html">ReactiveX operators documentation: Subscribe</a>
      */
-    public RetainWrapper<T> subscribe(Subscriber<T> subscriber) {
+    RetainWrapper<T> subscribe(Subscriber<? super T> subscriber) {
         mManager.subscribe(subscriber);
         return this;
     }

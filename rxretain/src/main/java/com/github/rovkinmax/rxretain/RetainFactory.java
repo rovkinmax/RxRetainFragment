@@ -65,7 +65,7 @@ public final class RetainFactory {
      * @param tag             tag for create or find fragment
      * @return instance of {@link RetainWrapper}
      */
-    public static <T> RetainWrapper<T> create(FragmentManager fragmentManager, Observable<T> observable, Subscriber<T> subscriber, String tag) {
+    public static <T> RetainWrapper<T> create(FragmentManager fragmentManager, Observable<T> observable, Subscriber<? super T> subscriber, String tag) {
         RetainWrapper<T> fragment = initFragment(fragmentManager, observable, tag);
         if (!fragment.getManager().hasSubscriber()) {
             fragment.getManager().setSubscriber(subscriber);
@@ -198,5 +198,24 @@ public final class RetainFactory {
     @SuppressWarnings("unchecked")
     private static <T> RetainWrapper<T> getFragmentByTag(FragmentManager fragmentManager, String tag) {
         return (RetainWrapper<T>) fragmentManager.findFragmentByTag(tag);
+    }
+
+    public static <T> Observable.Transformer<? super T, T> bindToRetain(final FragmentManager fragmentManager) {
+        return bindToRetain(fragmentManager, DEFAULT_TAG);
+    }
+
+    public static <T> Observable.Transformer<? super T, T> bindToRetain(final FragmentManager fragmentManager, final String tag) {
+        return new Observable.Transformer<T, T>() {
+            @Override
+            public Observable<T> call(final Observable<T> observable) {
+
+                return Observable.create(new Observable.OnSubscribe<T>() {
+                    @Override
+                    public void call(Subscriber<? super T> subscriber) {
+                        create(fragmentManager, observable, tag).subscribe(subscriber);
+                    }
+                });
+            }
+        };
     }
 }
