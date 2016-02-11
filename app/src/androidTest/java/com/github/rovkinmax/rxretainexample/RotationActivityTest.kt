@@ -212,12 +212,63 @@ class RotationActivityTest {
         val testSubscriber = TestSubscriber<Long>()
         val scheduler = TestScheduler()
         val testObservable = TestSubject.create<Long>(scheduler)
-        val wrapper = RetainFactory.start(fragmentManager, testObservable, testSubscriber)
+        RetainFactory.start(fragmentManager, testObservable, testSubscriber)
         testSubscriber.awaitTerminalEvent(2, SECONDS)
 
         solo.finishOpenedActivities()
         testSubscriber.assertUnsubscribed()
         Assert.assertFalse(testObservable.hasObservers())
+    }
+
+    @Test
+    fun testComposeBinding() {
+        var subscriber = TestSubscriber<Int>()
+        val subscription = rangeWithDelay(0, 5, SECONDS.toMillis(5))
+                .bindToThread()
+                .compose(RetainFactory.bindToRetain(fragmentManager))
+                .subscribe(subscriber)
+
+        subscriber.awaitTerminalEvent(1, SECONDS)
+
+        changeOrientationAndWait()
+        subscriber.assertUnsubscribed()
+        Assert.assertTrue(subscription.isUnsubscribed)
+
+        val secondSubscriber = TestSubscriber<Int>()
+
+        rangeWithDelay(0, 2, SECONDS.toMillis(5))
+                .bindToThread()
+                .compose(RetainFactory.bindToRetain(fragmentManager))
+                .subscribe(secondSubscriber)
+
+
+        secondSubscriber.awaitTerminalEvent()
+        secondSubscriber.assertReceivedOnNext((0..4).toCollection(arrayListOf()))
+    }
+
+    @Test
+    fun testErrorWithCompose() {
+        var subscriber = TestSubscriber<Int>()
+        val subscription = errorObservable(TestException("Expected exception"))
+                .bindToThread()
+                .compose(RetainFactory.bindToRetain(fragmentManager))
+                .subscribe(subscriber)
+
+        subscriber.awaitTerminalEvent(1, SECONDS)
+
+        changeOrientationAndWait()
+        subscriber.assertUnsubscribed()
+        Assert.assertTrue(subscription.isUnsubscribed)
+
+        val secondSubscriber = TestSubscriber<Int>()
+
+        errorObservable(TestException("Unexpected exception"))
+                .bindToThread()
+                .compose(RetainFactory.bindToRetain(fragmentManager))
+                .subscribe(secondSubscriber)
+
+        secondSubscriber.awaitTerminalEvent()
+        secondSubscriber.assertError(TestException("Expected exception"))
     }
 
     private fun changeOrientationAndWait() {

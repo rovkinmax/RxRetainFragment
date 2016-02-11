@@ -62,20 +62,23 @@ class SimpleActivityTest {
     }
 
 
-    @Test fun testRunByEmptySubscribe() {
+    @Test
+    fun testRunByEmptySubscribe() {
         val firstSubscriber = TestSubscriber<Int>()
         createFragmentWithTimer("first", firstSubscriber).subscribe()
         firstSubscriber.assertCompleted()
         firstSubscriber.assertReceivedOnNext((0..9).toCollection(arrayListOf<Int>()))
     }
 
-    @Test fun testErrorWithEmptySubscribeMethod() {
+    @Test
+    fun testErrorWithEmptySubscribeMethod() {
         val firstSubscriber = TestSubscriber<Int>()
         createFragmentWithOnErrorAction("second", firstSubscriber, TestException("Expected exception")).subscribe()
         firstSubscriber.assertError(TestException("Expected exception"))
     }
 
-    @Test fun testRunBySubscribeWithOnNextAction() {
+    @Test
+    fun testRunBySubscribeWithOnNextAction() {
         val list = ArrayList<Int>()
         createFragmentWithTimer("first").subscribe({ list.add(it) })
         Assert.assertEquals((0..9).toCollection(arrayListOf<Int>()), list)
@@ -100,7 +103,7 @@ class SimpleActivityTest {
     }
 
     @Test
-    fun testErrorWithSubscribeByTreeCallbacks() {
+    fun testErrorWithSubscribeByThreeCallbacks() {
         var isOnNextCalled = false
         var isCompleted = false
         var exception: Throwable? = null
@@ -318,7 +321,7 @@ class SimpleActivityTest {
 
 
     @Test
-    fun testCompose() {
+    fun testSimpleBindWithCompose() {
         val subscriber = TestSubscriber<Int>()
         val observable = rangeWithDelay(0, 10, 4000)
         observable.bindToThread()
@@ -347,5 +350,38 @@ class SimpleActivityTest {
         subscriber.awaitTerminalEvent(4, SECONDS)
 
         subscriber.assertNoTerminalEvent()
+    }
+
+    @Test
+    fun testErrorWithComposeBinding() {
+        val firstSubscriber = TestSubscriber<Int>()
+        errorObservable(TestException("Expected exception"))
+                .bindToThread()
+                .compose(RetainFactory.bindToRetain(fragmentManager))
+                .subscribe(firstSubscriber)
+
+        firstSubscriber.awaitTerminalEvent()
+        firstSubscriber.assertError(TestException("Expected exception"))
+    }
+
+    @Test
+    fun testErrorAfterUnsubscribeWithCompose() {
+        val firstSubscriber = TestSubscriber<Int>()
+        val subscription = errorObservable(TestException("Expected exception"))
+                .bindToThread()
+                .compose(RetainFactory.bindToRetain(fragmentManager))
+                .subscribe(firstSubscriber)
+
+        firstSubscriber.awaitTerminalEvent(1, SECONDS)
+        subscription.unsubscribe()
+
+        val secondSubscriber = TestSubscriber<Int>()
+        errorObservable(TestException("Unexpected exception"))
+                .bindToThread()
+                .compose(RetainFactory.bindToRetain(fragmentManager))
+                .subscribe(secondSubscriber)
+
+        secondSubscriber.awaitTerminalEvent()
+        secondSubscriber.assertError(TestException("Expected exception"))
     }
 }
