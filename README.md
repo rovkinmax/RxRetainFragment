@@ -2,7 +2,7 @@
 
 install from `jcenter()`
 ``` gradle
-compile 'com.github.rovkinmax:rxretain:1.0.4'
+compile 'com.github.rovkinmax:rxretain:1.0.5'
 ```
 ##### Simple example for orientation changes
 ``` Java
