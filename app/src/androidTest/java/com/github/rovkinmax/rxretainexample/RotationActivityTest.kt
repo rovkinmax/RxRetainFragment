@@ -34,6 +34,7 @@ class RotationActivityTest {
     private lateinit var device: UiDevice
     private lateinit var basePackage: String
     private lateinit var solo: Solo
+
     @Before
     fun setUp() {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
@@ -45,12 +46,15 @@ class RotationActivityTest {
         solo = Solo(InstrumentationRegistry.getInstrumentation(), activity)
         basePackage = activity.packageName
         fragmentManager = activity.fragmentManager
+        clearFragments()
     }
 
     @Test
     fun testUnsubscribeAfterActivityRotation() {
         val testSubscriber = TestSubscriber<Long>()
-        RetainFactory.start(fragmentManager, Observable.timer(10, SECONDS).bindToThread(), testSubscriber)
+        runOnUIAndWait {
+            RetainFactory.start(fragmentManager, Observable.timer(10, SECONDS).bindToThread(), testSubscriber)
+        }
         testSubscriber.awaitTerminalEvent(2, SECONDS)
 
         changeOrientationAndWait()
@@ -60,7 +64,7 @@ class RotationActivityTest {
     @Test
     fun testAttachInToRunningObservableAfterRotation() {
         val testSubscriber = TestSubscriber<Int>()
-        RetainFactory.start(fragmentManager, rangeWithDelay(0, 10, SECONDS.toMillis(10)).bindToThread(), testSubscriber)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, rangeWithDelay(0, 10, SECONDS.toMillis(10)).bindToThread(), testSubscriber) }
         testSubscriber.awaitTerminalEvent(2, SECONDS)
 
         changeOrientationAndWait()
@@ -68,7 +72,7 @@ class RotationActivityTest {
 
         val secondSubscriber = TestSubscriber<Int>()
         //in this case may use any observable. I want use null, cause now it's ignored
-        RetainFactory.start(fragmentManager, null, secondSubscriber)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, null, secondSubscriber) }
 
         secondSubscriber.awaitIfNotUnsubscribed()
 
@@ -79,14 +83,14 @@ class RotationActivityTest {
     @Test
     fun testCacheAfterRotationWithStartMethod() {
         val testSubscriber = TestSubscriber<Int>()
-        RetainFactory.start(fragmentManager, rangeWithDelay(0, 10, SECONDS.toMillis(2)).bindToThread(), testSubscriber)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, rangeWithDelay(0, 10, SECONDS.toMillis(2)).bindToThread(), testSubscriber) }
         testSubscriber.awaitTerminalEvent(10, SECONDS)
 
         changeOrientationAndWait()
 
         val secondSubscription = TestSubscriber<Int>()
         //in this case may use any observable. I want use null, cause now it's ignored
-        RetainFactory.start(fragmentManager, null, secondSubscription)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, null, secondSubscription) }
         secondSubscription.awaitTerminalEvent(10, SECONDS)
 
         secondSubscription.assertCompleted()
@@ -98,11 +102,11 @@ class RotationActivityTest {
         val firstTag = "first tag"
         val secondTag = "second tag"
         var firstSubscriber = TestSubscriber<Int>()
-        RetainFactory.start(fragmentManager, rangeWithDelay(0, 5, SECONDS.toMillis(5)).bindToThread(), firstSubscriber, firstTag)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, rangeWithDelay(0, 5, SECONDS.toMillis(5)).bindToThread(), firstSubscriber, firstTag) }
         firstSubscriber.awaitTerminalEvent(1, SECONDS)
 
         var secondSubscriber = TestSubscriber<Int>()
-        RetainFactory.start(fragmentManager, rangeWithDelay(0, 4, SECONDS.toMillis(8)).bindToThread(), secondSubscriber, secondTag)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, rangeWithDelay(0, 4, SECONDS.toMillis(8)).bindToThread(), secondSubscriber, secondTag) }
         secondSubscriber.awaitTerminalEvent(2, SECONDS)
 
         changeOrientationAndWait()
@@ -112,8 +116,8 @@ class RotationActivityTest {
 
         firstSubscriber = TestSubscriber()
         secondSubscriber = TestSubscriber()
-        RetainFactory.start(fragmentManager, null, firstSubscriber, firstTag)
-        RetainFactory.start(fragmentManager, null, secondSubscriber, secondTag)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, null, firstSubscriber, firstTag) }
+        runOnUIAndWait { RetainFactory.start(fragmentManager, null, secondSubscriber, secondTag) }
 
         firstSubscriber.awaitIfNotUnsubscribed()
         secondSubscriber.awaitIfNotUnsubscribed()
@@ -129,12 +133,12 @@ class RotationActivityTest {
     @Test
     fun testCacheErrorAfterRotation() {
         val subscriber = TestSubscriber<Int>()
-        RetainFactory.start(fragmentManager, errorObservable(TestException("ha")).bindToThread(), subscriber)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, errorObservable(TestException("ha")).bindToThread(), subscriber) }
         subscriber.awaitTerminalEvent(2, SECONDS)
 
         changeOrientationAndWait()
         val subscriber2 = TestSubscriber<Int>()
-        RetainFactory.start(fragmentManager, null, subscriber2)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, null, subscriber2) }
         subscriber2.awaitIfNotUnsubscribed()
         subscriber2.assertError(TestException("ha"))
     }
@@ -144,11 +148,11 @@ class RotationActivityTest {
         val firstTag = "first tag"
         val secondTag = "second tag"
         var firstSubscriber = TestSubscriber<Int>()
-        RetainFactory.start(fragmentManager, errorObservable(TestException("first")).bindToThread(), firstSubscriber, firstTag)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, errorObservable(TestException("first")).bindToThread(), firstSubscriber, firstTag) }
         firstSubscriber.awaitTerminalEvent(1, SECONDS)
 
         var secondSubscriber = TestSubscriber<Int>()
-        RetainFactory.start(fragmentManager, errorObservable(TestException("second")).bindToThread(), secondSubscriber, secondTag)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, errorObservable(TestException("second")).bindToThread(), secondSubscriber, secondTag) }
         secondSubscriber.awaitTerminalEvent(2, SECONDS)
 
         changeOrientationAndWait()
@@ -158,8 +162,8 @@ class RotationActivityTest {
 
         firstSubscriber = TestSubscriber()
         secondSubscriber = TestSubscriber()
-        RetainFactory.start(fragmentManager, null, firstSubscriber, firstTag)
-        RetainFactory.start(fragmentManager, null, secondSubscriber, secondTag)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, null, firstSubscriber, firstTag) }
+        runOnUIAndWait { RetainFactory.start(fragmentManager, null, secondSubscriber, secondTag) }
 
         firstSubscriber.awaitIfNotUnsubscribed()
         secondSubscriber.awaitIfNotUnsubscribed()
@@ -171,7 +175,7 @@ class RotationActivityTest {
     @Test
     fun testClearCacheAfterUnsubscribeFragment() {
         val subscriber = TestSubscriber<Int>()
-        val fragment = RetainFactory.start(fragmentManager, rangeWithDelay(0, 5, SECONDS.toMillis(5)).bindToThread(), subscriber)
+        val fragment = runOnUIAndWait { RetainFactory.start(fragmentManager, rangeWithDelay(0, 5, SECONDS.toMillis(5)).bindToThread(), subscriber) }
         subscriber.awaitTerminalEvent(2, SECONDS)
         fragment.unsubscribe()
 
@@ -180,7 +184,7 @@ class RotationActivityTest {
         changeOrientationAndWait()
 
         val subscriber2 = TestSubscriber<Int>()
-        RetainFactory.start(fragmentManager, null, subscriber2)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, null, subscriber2) }
         subscriber2.awaitTerminalEvent(2, SECONDS)
         subscriber2.unsubscribe()
 
@@ -190,7 +194,7 @@ class RotationActivityTest {
     @Test
     fun testClearErrorCacheAfterUnsubscribeFragment() {
         val subscriber = TestSubscriber<Int>()
-        val fragment = RetainFactory.start(fragmentManager, errorObservable(TestException("cached")).bindToThread(), subscriber)
+        val fragment = runOnUIAndWait { RetainFactory.start(fragmentManager, errorObservable(TestException("cached")).bindToThread(), subscriber) }
         subscriber.awaitTerminalEvent(2, SECONDS)
         fragment.unsubscribe()
 
@@ -199,7 +203,7 @@ class RotationActivityTest {
         changeOrientationAndWait()
 
         val subscriber2 = TestSubscriber<Int>()
-        RetainFactory.start(fragmentManager, null, subscriber2)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, null, subscriber2) }
         subscriber2.awaitTerminalEvent(2, SECONDS)
         subscriber2.unsubscribe()
 
@@ -212,7 +216,7 @@ class RotationActivityTest {
         val testSubscriber = TestSubscriber<Long>()
         val scheduler = TestScheduler()
         val testObservable = TestSubject.create<Long>(scheduler)
-        RetainFactory.start(fragmentManager, testObservable, testSubscriber)
+        runOnUIAndWait { RetainFactory.start(fragmentManager, testObservable, testSubscriber) }
         testSubscriber.awaitTerminalEvent(2, SECONDS)
 
         solo.finishOpenedActivities()
@@ -223,10 +227,12 @@ class RotationActivityTest {
     @Test
     fun testComposeBinding() {
         var subscriber = TestSubscriber<Int>()
-        val subscription = rangeWithDelay(0, 5, SECONDS.toMillis(5))
-                .bindToThread()
-                .compose(RetainFactory.bindToRetain(fragmentManager))
-                .subscribe(subscriber)
+        val subscription = runOnUIAndWait {
+            rangeWithDelay(0, 5, SECONDS.toMillis(5))
+                    .bindToThread()
+                    .compose(RetainFactory.bindToRetain(fragmentManager, "compose tag"))
+                    .subscribe(subscriber)
+        }
 
         subscriber.awaitTerminalEvent(1, SECONDS)
 
@@ -236,10 +242,12 @@ class RotationActivityTest {
 
         val secondSubscriber = TestSubscriber<Int>()
 
-        rangeWithDelay(0, 2, SECONDS.toMillis(5))
-                .bindToThread()
-                .compose(RetainFactory.bindToRetain(fragmentManager))
-                .subscribe(secondSubscriber)
+        runOnUIAndWait {
+            rangeWithDelay(0, 2, SECONDS.toMillis(5))
+                    .bindToThread()
+                    .compose(RetainFactory.bindToRetain(fragmentManager, "compose tag"))
+                    .subscribe(secondSubscriber)
+        }
 
 
         secondSubscriber.awaitTerminalEvent()
@@ -249,10 +257,12 @@ class RotationActivityTest {
     @Test
     fun testErrorWithCompose() {
         var subscriber = TestSubscriber<Int>()
-        val subscription = errorObservable(TestException("Expected exception"))
-                .bindToThread()
-                .compose(RetainFactory.bindToRetain(fragmentManager))
-                .subscribe(subscriber)
+        val subscription = runOnUIAndWait {
+            errorObservable(TestException("Expected exception"))
+                    .bindToThread()
+                    .compose(RetainFactory.bindToRetain(fragmentManager, "compose tag [2]"))
+                    .subscribe(subscriber)
+        }
 
         subscriber.awaitTerminalEvent(1, SECONDS)
 
@@ -262,10 +272,12 @@ class RotationActivityTest {
 
         val secondSubscriber = TestSubscriber<Int>()
 
-        errorObservable(TestException("Unexpected exception"))
-                .bindToThread()
-                .compose(RetainFactory.bindToRetain(fragmentManager))
-                .subscribe(secondSubscriber)
+        runOnUIAndWait {
+            errorObservable(TestException("Unexpected exception"))
+                    .bindToThread()
+                    .compose(RetainFactory.bindToRetain(fragmentManager, "compose tag [2]"))
+                    .subscribe(secondSubscriber)
+        }
 
         secondSubscriber.awaitTerminalEvent()
         secondSubscriber.assertError(TestException("Expected exception"))
@@ -273,11 +285,29 @@ class RotationActivityTest {
 
     private fun changeOrientationAndWait() {
         device.setOrientationLeft()
-        device.waitForWindowUpdate(basePackage, SECONDS.toMillis(5))
+        Assert.assertTrue(device.waitForWindowUpdate(basePackage, SECONDS.toMillis(5)))
+    }
+
+    fun <T> runOnUIAndWait(func: () -> T): T {
+        var result: T? = null
+        InstrumentationRegistry.getInstrumentation().runOnMainSync { result = func() }
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        return result!!
     }
 
     @After
     fun tearDown() {
         solo.finishOpenedActivities()
+    }
+
+    private fun clearFragments() {
+        val fragment = fragmentManager.findFragmentByTag("RX_RETAIN_FRAGMENT_INSTANCE")
+        if (fragment != null) {
+            fragmentManager
+                    .beginTransaction()
+                    .remove(fragment)
+                    .commit()
+            runOnUIAndWait { fragmentManager.executePendingTransactions() }
+        }
     }
 }
