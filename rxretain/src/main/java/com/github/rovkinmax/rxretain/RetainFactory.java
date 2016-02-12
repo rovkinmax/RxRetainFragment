@@ -186,6 +186,7 @@ public final class RetainFactory {
         if (fragment == null) {
             fragment = new RetainWrapper<>(observable);
             fragmentManager.beginTransaction().add(fragment, tag).commit();
+            fragmentManager.executePendingTransactions();
         }
         if (!fragment.getManager().hasObservable()) {
             fragment.getManager().setObservable(observable);
