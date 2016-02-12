@@ -353,6 +353,32 @@ class SimpleActivityTest {
     }
 
     @Test
+    fun testOnStartAfterRebindingWithCompose() {
+        val subscriber = TestSubscriber<Int>()
+        val observable = rangeWithDelay(0, 10, 4000)
+        val subscription = observable.bindToThread()
+                .compose(RetainFactory.bindToRetain(fragmentManager))
+                .subscribe(subscriber)
+
+        subscriber.awaitTerminalEvent(2, SECONDS)
+        subscription.unsubscribe()
+
+        subscriber.assertUnsubscribed()
+
+        val secondSubscriber = Mockito.spy(TestSubscriber<Int>())
+        rangeWithDelay(0, 10, 4000)
+                .bindToThread()
+                .compose(RetainFactory.bindToRetain(fragmentManager))
+                .subscribe(secondSubscriber)
+
+        secondSubscriber.awaitTerminalEvent()
+
+        Mockito.verify(secondSubscriber).onStart()
+        subscriber.assertNoTerminalEvent()
+        secondSubscriber.assertReceivedOnNext((0..9).toCollection(arrayListOf()))
+    }
+
+    @Test
     fun testErrorWithComposeBinding() {
         val firstSubscriber = TestSubscriber<Int>()
         errorObservable(TestException("Expected exception"))
