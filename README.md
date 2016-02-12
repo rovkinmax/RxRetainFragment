@@ -2,8 +2,33 @@
 
 install from `jcenter()`
 ``` gradle
-compile 'com.github.rovkinmax:rxretain:1.0.5'
+compile 'com.github.rovkinmax:rxretain:1.1.0'
 ```
+
+##### Binding with compose() operator
+
+``` Java
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        yourAwesomeObservable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .compose(RetainFactory.bindToRetain(getFragmentManager())) //binding here
+                .subscribe(new EmptySubscriber<Object>() {
+                    @Override
+                    public void onStart() {
+                        showProgress();
+                    }
+
+                    @Override
+                    public void onNext(Object o) {
+                        updateUIWithData();
+                    }
+                });
+    }
+```
+
 ##### Simple example for orientation changes
 ``` Java
 public class MainActivity extends Activity {
