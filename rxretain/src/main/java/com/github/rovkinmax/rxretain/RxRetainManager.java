@@ -1,7 +1,5 @@
 package com.github.rovkinmax.rxretain;
 
-import java.lang.ref.WeakReference;
-
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
@@ -16,11 +14,11 @@ import rx.subscriptions.CompositeSubscription;
  */
 class RxRetainManager<T> {
     private ReplaySubject<T> mReplaySubject;
-    private WeakReference<Subscription> mRefReplaySubscription;
+    private Subscription mRefReplaySubscription;
 
     private CompositeSubscription mCurrentSubscriptions = new CompositeSubscription();
-    private WeakReference<Observable<T>> mRefObservable;
-    private WeakReference<? extends Subscriber<? super T>> mRefSubscriber;
+    private Observable<T> mRefObservable;
+    private Subscriber<? super T> mRefSubscriber;
 
 
     RxRetainManager(Observable<T> observable) {
@@ -28,7 +26,7 @@ class RxRetainManager<T> {
     }
 
     void setObservable(Observable<T> observable) {
-        mRefObservable = new WeakReference<>(observable);
+        mRefObservable = observable;
     }
 
     void subscribe(Action1<T> onNext) {
@@ -55,7 +53,7 @@ class RxRetainManager<T> {
         if (mReplaySubject == null) {
             mReplaySubject = ReplaySubject.create();
             if (hasObservable()) {
-                mRefReplaySubscription = new WeakReference<>(getObservable().subscribe(mReplaySubject));
+                mRefReplaySubscription = getObservable().subscribe(mReplaySubject);
             } else {
                 throw new RuntimeException("Can't run. First you must create RetainWrapper with not null observer");
             }
@@ -64,10 +62,10 @@ class RxRetainManager<T> {
     }
 
     void setSubscriber(Subscriber<? super T> observer) {
-        if (mRefSubscriber != null && mRefSubscriber.get() != observer) {
+        if (mRefSubscriber != null && mRefSubscriber != observer) {
             return;
         }
-        mRefSubscriber = new WeakReference<>(observer);
+        mRefSubscriber = observer;
         if (mReplaySubject != null && observer != null) {
             subscribeObserver();
         }
@@ -94,33 +92,30 @@ class RxRetainManager<T> {
         if (mRefReplaySubscription == null) {
             return null;
         }
-        return mRefReplaySubscription.get();
+        return mRefReplaySubscription;
     }
 
     void unsubscribeCurrentIfOption() {
         unsubscribeIfOption(mCurrentSubscriptions);
         mCurrentSubscriptions.clear();
         mCurrentSubscriptions = new CompositeSubscription();
-        if (mRefSubscriber != null) {
-            mRefSubscriber.clear();
-        }
         mRefSubscriber = null;
     }
 
     boolean hasSubscriber() {
-        return mRefSubscriber != null && getObserver() != null;
+        return mRefSubscriber != null;
     }
 
     private Subscriber<? super T> getObserver() {
-        return mRefSubscriber.get();
+        return mRefSubscriber;
     }
 
     boolean hasObservable() {
-        return mRefObservable != null && getObservable() != null;
+        return mRefObservable != null;
     }
 
     private Observable<T> getObservable() {
-        return mRefObservable.get();
+        return mRefObservable;
     }
 
     private void unsubscribeIfOption(Subscription subscription) {

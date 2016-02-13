@@ -285,7 +285,7 @@ class RotationActivityTest {
 
     private fun changeOrientationAndWait() {
         device.setOrientationLeft()
-        Assert.assertTrue(device.waitForWindowUpdate(basePackage, SECONDS.toMillis(5)))
+        device.waitForWindowUpdate(basePackage, SECONDS.toMillis(5))
     }
 
     fun <T> runOnUIAndWait(func: () -> T): T {
