@@ -10,7 +10,7 @@ import org.junit.runners.JUnit4
  * @author Rovkin Max
  */
 @RunWith(JUnit4::class)
-class UntilTest {
+class UtilTest {
     @Test
     fun testEqualsTestException() {
         val one = TestException("Expected")
