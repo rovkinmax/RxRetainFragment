@@ -2,7 +2,7 @@
 
 install from `jcenter()`
 ``` gradle
-compile 'com.github.rovkinmax:rxretain:1.1.0'
+compile 'com.github.rovkinmax:rxretain:1.1.1'
 ```
 
 ##### Binding with compose() operator
