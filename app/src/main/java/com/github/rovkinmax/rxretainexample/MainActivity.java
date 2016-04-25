@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.github.rovkinmax.rxretain.EmptySubscriber;
 import com.github.rovkinmax.rxretain.RetainFactory;
@@ -22,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "RX_TAG";
     private RetainWrapper<Integer> mRotateExample;
 
+    private Observable<Integer> mObservable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,6 +35,16 @@ public class MainActivity extends AppCompatActivity {
                 printInt(integer);
             }
         }, "ROTATION_PRINTER");
+
+        initReadyToUserObservable(10)
+                .compose(RetainFactory.<Integer>bindToRetain(getFragmentManager(), "ROTATION_PRINTER"))
+                .doOnSubscribe(new Action0() {
+                    @Override
+                    public void call() {
+                        Toast.makeText(MainActivity.this, "start", Toast.LENGTH_LONG).show();
+                    }
+                }).subscribe();
+
     }
 
     public void openSecondActivity(View v) {
@@ -81,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
                     public void call() {
                     }
                 });
+
     }
 
     private void restartObservable(int count, String tag) {
@@ -99,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void rotateExample(View view) {
-        mRotateExample.subscribe();
+        mObservable.subscribe();
     }
 
     private Observable<Integer> initReadyToUserObservable(int count) {

@@ -2,6 +2,7 @@ package com.github.rovkinmax.rxretainexample.test
 
 import android.app.Activity
 import android.os.Bundle
+import android.widget.Button
 import java.util.*
 
 /**
@@ -9,8 +10,12 @@ import java.util.*
  */
 open class TestableActivity : Activity() {
     val listMethods = ArrayList<String>()
+    private lateinit var button: Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        button = Button(this)
+        button.tag = "button"
+        setContentView(button)
         addMethod("onCreate()")
     }
 
@@ -41,5 +46,10 @@ open class TestableActivity : Activity() {
 
     private fun addMethod(string: String) {
         listMethods.add(string)
+    }
+
+    fun performClick(function: () -> Unit) {
+        button.setOnClickListener { function() }
+        button.performClick()
     }
 }
