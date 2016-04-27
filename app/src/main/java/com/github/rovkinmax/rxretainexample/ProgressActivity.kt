@@ -21,6 +21,10 @@ class ProgressActivity : Activity() {
     private var dialog: ProgressDialog? = null
     private var wrapper: RetainWrapper<Int>? = null
 
+    val observable = rangeWithDelay(0, 100, TimeUnit.SECONDS.toMillis(120))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -32,15 +36,14 @@ class ProgressActivity : Activity() {
             wrapper?.subscribe()
         }
 
-        val observable = rangeWithDelay(0, 100, TimeUnit.SECONDS.toMillis(120))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+    }
 
+    override fun onResume() {
+        super.onResume()
         wrapper = RetainFactory.create(fragmentManager, observable, object : EmptySubscriber<Int>() {
             override fun onStart() {
-                dialog = ProgressDialog(this@ProgressActivity).apply {
-                    show()
-                }
+                dialog = ProgressDialog(this@ProgressActivity)
+                dialog!!.show()
             }
 
             override fun onNext(t: Int) {
